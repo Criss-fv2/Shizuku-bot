@@ -44,7 +44,7 @@ rápido y letal – Shizuku System 🖤*
 
 **1. Clona el repositorio:**
 ```bash
-git clone https://github.com/zoredevteam-ctrl/Shizuku.git
+git clone https://github.com/Criss-fv/Shizuku-bot.git
 cd Shizuku-bot 
 ```
 
