@@ -1,0 +1,95 @@
+{
+  "users": {
+    "5216653470605@s.whatsapp.net": {
+      "registered": false,
+      "premium": false,
+      "banned": false,
+      "warning": 0,
+      "exp": 0,
+      "level": 1,
+      "limit": 20,
+      "lastclaim": 0,
+      "registered_time": 0,
+      "name": ".",
+      "age": null
+    },
+    "5216644847052@s.whatsapp.net": {
+      "registered": false,
+      "premium": false,
+      "banned": false,
+      "warning": 0,
+      "exp": 0,
+      "level": 1,
+      "limit": 20,
+      "lastclaim": 0,
+      "registered_time": 0,
+      "name": "sdk",
+      "age": null
+    },
+    "573135180876@s.whatsapp.net": {
+      "registered": false,
+      "premium": false,
+      "banned": false,
+      "warning": 0,
+      "exp": 0,
+      "level": 1,
+      "limit": 20,
+      "lastclaim": 0,
+      "registered_time": 0,
+      "name": "DuarteXV",
+      "age": null
+    },
+    "75343020949664@lid": {
+      "registered": false,
+      "premium": false,
+      "banned": false,
+      "warning": 0,
+      "exp": 0,
+      "level": 1,
+      "limit": 20,
+      "lastclaim": 0,
+      "registered_time": 0,
+      "name": "",
+      "age": null
+    },
+    "null": {
+      "registered": false,
+      "premium": false,
+      "banned": false,
+      "warning": 0,
+      "exp": 0,
+      "level": 1,
+      "limit": 20,
+      "lastclaim": 0,
+      "registered_time": 0,
+      "name": "",
+      "age": null
+    }
+  },
+  "groups": {
+    "120363423448502613@g.us": {
+      "modoadmin": false,
+      "muted": [],
+      "welcome": true,
+      "goodbye": true,
+      "nsfw": true,
+      "antispam": false,
+      "antilink": true
+    },
+    "120363423018555575@g.us": {
+      "modoadmin": false,
+      "muted": []
+    }
+  },
+  "settings": {
+    "mode": "public",
+    "welcome": true,
+    "antilink": false,
+    "antispam": false,
+    "sinprefix": true
+  },
+  "stats": {
+    "totalCommands": 0,
+    "startTime": 1778846519996
+  }
+}
