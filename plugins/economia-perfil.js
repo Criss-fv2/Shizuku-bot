@@ -98,9 +98,9 @@ const handler = async (m, { conn }) => {
 📅 Registro: ${fechaRegistro} | 🎂 Edad: ${user.age || 'N/A'}
 
 🕸️ 𝑺𝒉𝒊𝖟𝒖𝒌𝒖 𝑬𝒄𝒐𝒏𝒐𝒎𝒚
-💵 Efectivo: $${user.eco.dinero} Nen
-🏦 Banco: $${user.eco.banco} Nen
-💰 Total Neto: $${totalDinero} Nen
+💵 Efectivo: $${user.eco.dinero} ${global.moneda}
+🏦 Banco: $${user.eco.banco} ${global.moneda}
+💰 Total Neto: $${totalDinero} ${global.moneda}
 
 🕸️ 𝑺𝒉𝒊𝖟𝒖𝒌𝒖 𝑳𝒆𝒗𝒆𝒍 & 𝑬𝒙𝒑
 📈 Rango: Nivel ${user.eco.level}
