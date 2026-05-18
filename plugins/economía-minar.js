@@ -107,8 +107,9 @@ const handler = async (m, { conn }) => {
 🛠️ Excavación: Encontraste ${detalleMineral}.${esCritico ? ' ¡CRÍTICO! 🔥' : ''}
 ${balanceTexto}
 
-📌 Cartera: $${user.eco.dinero} Nen | Nivel: ${user.eco.level}
-_...sistema actualizado, túneles bloqueados por 2 horas._ 🕷️
+ Cartera: $${user.eco.dinero} Nen | Nivel: ${user.eco.level}
+
+_...sistema actualizado, túneles bloqueados por 5 minutos._ 🕷️
     `.trim()
 
     await conn.sendMessage(m.chat, { text: mensajeMine }, { quoted: m })
