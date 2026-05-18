@@ -8,8 +8,8 @@ let handler = async (m, { conn }) => {
         const pluginsDir = './plugins'
         const files = fs.readdirSync(pluginsDir).filter(file => file.endsWith('.js'))
 
-        let response = `✨ *Detección de Errores - Zero Two* ✨\n\n`
-        response += `🌸 Revisando ${files.length} archivos, darling...\n`
+        let response = `🕸 *Detección de Errores - ${botname}* 🕸\n\n`
+        response += `🕷 Revisando ${files.length} archivos...\n`
         response += `━━━━━━━━━━━━━━━━━━━\n\n`
 
         let hasErrors = false
@@ -34,21 +34,21 @@ let handler = async (m, { conn }) => {
         }
 
         if (!hasErrors) {
-            response += `🌸 *¡Todo perfecto, darling!*\n\n`
-            response += `✨ No se detectaron errores de sintaxis\n`
-            response += `💗 Todos los ${files.length} archivos están funcionando correctamente~`
+            response += `🕷 *¡Todo perfecto!*\n\n`
+            response += `🕸 No se detectaron errores de sintaxis\n`
+            response += `🖤 Todos los ${files.length} archivos están funcionando correctamente~`
         } else {
             response += `💢 *Resumen de errores:*\n\n`
             response += `❌ Total de errores: ${errorCount}\n`
             response += `📂 Archivos revisados: ${files.length}\n`
-            response += `💗 Revisa los archivos mencionados, darling~`
+            response += `🖤 Revisa los archivos mencionados, darling~`
         }
 
         await m.reply(response)
-        await m.react(hasErrors ? '💔' : '💗')
+        await m.react(hasErrors ? '💔' : '🖤')
     } catch (err) {
         await m.react('💔')
-        await m.reply(`💔 Darling, algo salió mal...\n\n📝 *Error:* ${err.message}`)
+        await m.reply(`💔 algo salió mal...\n\n📝 *Error:* ${err.message}`)
     }
 }
 
