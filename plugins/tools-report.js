@@ -1,4 +1,4 @@
-const REPORT_GROUP = '5216653470605@s.whatsapp.net';
+const REPORT_GROUP = '120363423448502613@g.us';
 
 const handler = async (m, { conn, args, prefix }) => {
     const reason = args.join(' ');
@@ -10,7 +10,7 @@ const handler = async (m, { conn, args, prefix }) => {
     const sender = m.sender.split('@')[0];
     const pushName = m.pushName || 'Sin nombre';
     const chat = m.isGroup ? m.chat : '💬 Chat Privado';
-    const time = new Date().toLocaleString('es-ES', { timeZone: 'America/Bogota' });
+    const time = new Date().toLocaleString('es-ES', { timeZone: 'America/Tijuana' });
 
     const reportMsg =
         `「 🚨 *ERROR REPORTADO* 🚨 」\n\n` +
