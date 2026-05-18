@@ -7,9 +7,9 @@ let handler = async (m, { conn }) => {
 
     // 📞 Lista de creadores ordenada según lo solicitado
     const users = [
-      { nombre: '♡ Criss-fv - 𝑪𝒓𝒆𝒂𝒅𝒐𝒓 ♡', numero: '526653470605' },
+      { nombre: '♡ 𝑪𝒓𝒊𝒔𝒔-𝒇𝒗 - 𝑪𝒓𝒆𝒂𝒅𝒐𝒓 ♡', numero: '526653470605' },
       { nombre: '♡ Duarte - 𝑪𝒓𝒆𝒂𝒅𝒐𝒓 ♡', numero: '573135180876' },
-      { nombre: '♡ Yosua - 𝑪𝒓𝒆𝒂𝒅𝒐𝒓 ♡', numero: '584242773183' }
+      { nombre: '♡ 𝑹𝒂𝒗𝒆𝒏𝒏𝒂 - 𝑪𝒓𝒆𝒂𝒅𝒐𝒓 ♡', numero: '9779829141452' }
     ];
 
     // 📇 Generar las vCards para cada usuario
