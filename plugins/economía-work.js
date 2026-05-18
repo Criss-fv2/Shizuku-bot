@@ -155,16 +155,16 @@ const handler = async (m, { conn }) => {
 
     await database.save()
 
-    // 🕷️ Diseño ultra-compacto y estético para Shizuku System
+    
     const mensajeCorto = `
 ✠ ══〔 𝕾𝖍𝖎𝖟𝖚𝖐𝖚 𝖤𝖼𝗈𝗇𝗈𝖒𝗒 〕══ ✠
 
 🕸️ Operación: ${trabajoAleatorio}
 
-💵 Ganancia: +$${dineroGanado} Nen
+💵 Ganancia: +$${dineroGanado} ${global.moneda}
 ✨ Exp: +${expGanada} XP
 
-Cartera: $${user.eco.dinero} Nen 
+Cartera: $${user.eco.dinero} ${global.moneda} 
 | Nivel: ${user.eco.level} (${user.eco.exp} EXP)
 _...fondos guardados, espera 30s._ 🕷️
     `.trim()
