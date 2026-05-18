@@ -30,11 +30,11 @@ const handler = async (m, { args }) => {
         }
 
         if (!cantidad || cantidad < 50) {
-            return m.reply('❌ El monto mínimo para ingresar a las bóvedas es de $50 Nen.\n📌 Uso: .banco dep <cantidad/all>')
+            return m.reply('❌ El monto mínimo para ingresar a las bóvedas es de $50 ${global.moneda}.\n📌 Uso: .banco dep <cantidad/all>')
         }
 
         if (cantidad > user.eco.dinero) {
-            return m.reply(`❌ Fondos insuficientes en mano. Cuentas con: $${user.eco.dinero} Nen`)
+            return m.reply(`❌ Fondos insuficientes en mano. Cuentas con: $${user.eco.dinero} ${global.moneda}`)
         }
 
         user.eco.dinero -= cantidad
@@ -46,9 +46,9 @@ const handler = async (m, { args }) => {
 
 🕸️ 𝑺𝒉𝒊𝖟𝒖𝒌𝒖 𝑫𝒆𝒑𝒐𝒔𝒊𝒕
 📥 Transacción: Fondos resguardados con éxito.
-💵 Ingreso: +$${cantidad} Nen
+💵 Ingreso: +$${cantidad} ${global.moneda}
 
-📌 Bóveda: $${user.eco.banco} Nen | Cartera: $${user.eco.dinero} Nen
+📌 Bóveda: $${user.eco.banco} ${global.moneda} | Cartera: $${user.eco.dinero} ${global.moneda}
 _...bóveda encriptada._ 🕷️
         `.trim()
         return m.reply(mDep)
@@ -66,7 +66,7 @@ _...bóveda encriptada._ 🕷️
         }
 
         if (cantidad > user.eco.banco) {
-            return m.reply(`❌ Fondos insuficientes en bóveda. Cuentas con: $${user.eco.banco} Nen`)
+            return m.reply(`❌ Fondos insuficientes en bóveda. Cuentas con: $${user.eco.banco} ${global.moneda}`)
         }
 
         user.eco.banco -= cantidad
@@ -80,7 +80,7 @@ _...bóveda encriptada._ 🕷️
 📤 Transacción: Fondos retirados con éxito.
 💵 Retiro: +$${cantidad} Nen
 
-📌 Bóveda: $${user.eco.banco} Nen | Cartera: $${user.eco.dinero} Nen
+📌 Bóveda: $${user.eco.banco} ${global.moneda} | Cartera: $${user.eco.dinero} ${global.moneda}
 _...efectivo en mano._ 🕷️
         `.trim()
         return m.reply(mRet)
@@ -92,7 +92,7 @@ _...efectivo en mano._ 🕷️
 🕸️ 𝑺𝒉𝒊𝖟𝒖𝒌𝒖 𝑩𝒂𝒍𝒂𝒏𝒄𝒆
 💵 Cartera: $${user.eco.dinero} Nen
 🏦 Bóveda: $${user.eco.banco} Nen
-💰 Total Neto: $${user.eco.dinero + user.eco.banco} Nen
+💰 Total Neto: $${user.eco.dinero + user.eco.banco} ${global.moneda}
 
 🔏 Operaciones rápidas:
 • .banco dep <monto/all>
