@@ -30,11 +30,11 @@ const handler = async (m, { args }) => {
         }
 
         if (!cantidad || cantidad < 50) {
-            return m.reply('❌ El monto mínimo para ingresar a las bóvedas es de $50 ('${global.moneda}').\n📌 Uso: .banco dep <cantidad/all>')
+            return m.reply('❌ El monto mínimo para ingresar a las bóvedas es de $50 ${global.moneda}.\n📌 Uso: .banco dep <cantidad/all>')
         }
 
         if (cantidad > user.eco.dinero) {
-            return m.reply(`❌ Fondos insuficientes en mano. Cuentas con: $${user.eco.dinero} ${global.moneda}`)
+            return m.reply(`❌ Fondos insuficientes en mano. Cuentas con: $${user.eco.dinero} ${global.moneda}
         }
 
         user.eco.dinero -= cantidad
