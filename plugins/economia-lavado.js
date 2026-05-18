@@ -112,6 +112,7 @@ handler.help =['vender']
 handler.help =['comprar']
 handler.help =['recaudar']
 handler.tags = ['economia']
+handler.command =['polnito']
 handler.command = ['tienda', 'comprar', 'vender', 'recaudar']
 handler.register = true
 
