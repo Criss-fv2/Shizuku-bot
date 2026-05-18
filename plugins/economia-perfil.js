@@ -41,7 +41,7 @@ const handler = async (m, { conn }) => {
 
     const user = database.data.users[jid]
     
-    // Asegurar que existe eco
+
     if (!user.eco) {
         user.eco = { 
             dinero: 500, 
@@ -126,7 +126,7 @@ _...datos sincronizados, la red está vigilante._ 🕷️
 
 handler.help = ['perfil']
 handler.tags = ['economia']
-handler.command = ['perfil', 'profile', 'me', 'yo', 'stats']
+handler.command = ['perfil', 'profile']
 handler.register = true
 
 export default handler
