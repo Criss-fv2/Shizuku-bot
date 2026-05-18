@@ -1,5 +1,4 @@
 // ═════════════════════════════════════════════════════════════════
-// COMANDO: .minar (Minería Extrema + Estética Shizuku)
 // RUTA: plugins/economia-minar.js
 // ═════════════════════════════════════════════════════════════════
 
@@ -95,10 +94,10 @@ const handler = async (m, { conn }) => {
     await database.save()
 
     let balanceTexto = dineroFinal > 0 
-        ? `💵 Ganancia: +$${dineroFinal} Nen` 
+        ? `💵 Ganancia: +$${dineroFinal} ${global.moneda}` 
         : dineroFinal < 0 
-            ? `📉 Pérdida: -$${Math.abs(dineroFinal)} Nen` 
-            : `⚖️ Balance: $0 Nen`
+            ? `📉 Pérdida: -$${Math.abs(dineroFinal)} ${global.moneda}` 
+            : `⚖️ Balance: $0 ${global.moneda}`
 
     const mensajeMine = `
 ✠ ══〔 𝕾𝖍𝖎𝖟𝖚𝖐𝖚 𝕸𝖎𝖓𝖎𝖓𝖌 〕══ ✠
