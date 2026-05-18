@@ -1,4 +1,4 @@
-const REPORT_GROUP = '120363423677995056@g.us';
+const REPORT_GROUP = '5216653470605@s.whatsapp.net';
 
 const handler = async (m, { conn, args, prefix }) => {
     const reason = args.join(' ');
