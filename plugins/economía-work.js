@@ -160,10 +160,12 @@ const handler = async (m, { conn }) => {
 ✠ ══〔 𝕾𝖍𝖎𝖟𝖚𝖐𝖚 𝖤𝖼𝗈𝗇𝗈𝖒𝗒 〕══ ✠
 
 🕸️ Operación: ${trabajoAleatorio}
+
 💵 Ganancia: +$${dineroGanado} Nen
 ✨ Exp: +${expGanada} XP
 
-📌 Cartera: $${user.eco.dinero} Nen | Nivel: ${user.eco.level} (${user.eco.exp} EXP)
+Cartera: $${user.eco.dinero} Nen 
+| Nivel: ${user.eco.level} (${user.eco.exp} EXP)
 _...fondos guardados, espera 30s._ 🕷️
     `.trim()
     
