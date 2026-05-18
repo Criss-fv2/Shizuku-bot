@@ -1,5 +1,4 @@
 // ═════════════════════════════════════════════════════════════════
-// SYSTEM: Sistema de Prostitución Clandestina y Trabajo de Calle
 // RUTA: plugins/eco-prostituta.js
 // ═════════════════════════════════════════════════════════════════
 
