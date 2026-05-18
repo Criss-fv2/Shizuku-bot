@@ -154,6 +154,8 @@ const handler = async (m, { conn }) => {
     user.eco.level = Math.floor(user.eco.exp / 1000) + 1
 
     await database.save()
+    
+
     // ─── PASO 6: Responder con la estética Shizuku ─────────────────
     const mensajeCorto = `
 ✠ ══〔 𝕾𝖍𝖎𝖟𝖚𝖐𝖚 𝖤𝖼𝗈𝗇𝗈𝗆𝗒 〕══ ✠
