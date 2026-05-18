@@ -154,21 +154,20 @@ const handler = async (m, { conn }) => {
     user.eco.level = Math.floor(user.eco.exp / 1000) + 1
 
     await database.save()
-
-    // 🕷️ Diseño ultra-compacto y estético para Shizuku System
+    // ─── PASO 6: Responder con la estética Shizuku ─────────────────
     const mensajeCorto = `
 ✠ ══〔 𝕾𝖍𝖎𝖟𝖚𝖐𝖚 𝖤𝖼𝗈𝗇𝗈𝗆𝗒 〕══ ✠
 
-🕷️ *Operación:* ${trabajoAleatorio}
-💰 *Ganancia:* +$${dineroGanado} Nen
-✨ *Exp:* +${expGanada} XP
+🕸️ Operación: ${trabajoAleatorio}
+💵 Ganancia: +$${dineroGanado} Nen
+✨ Exp: +${expGanada} XP
 
-📊 *Cartera:* $${user.eco.dinero} Nen | *Nivel:* ${user.eco.level} (${user.eco.exp} EXP)
-_...fondos guardados, espera 30s._ 🖤
+📌 Cartera: $${user.eco.dinero} Nen | Nivel: ${user.eco.level} (${user.eco.exp} EXP)
+_...fondos guardados, espera 30s._ 🕷️
     `.trim()
     
     await conn.sendMessage(m.chat, { text: mensajeCorto }, { quoted: m })
-}
+
 
 handler.help = ['work']
 handler.tags = ['economia']
