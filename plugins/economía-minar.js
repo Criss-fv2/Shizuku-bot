@@ -28,7 +28,7 @@ const handler = async (m, { conn }) => {
         const horas = Math.floor(tiempoFaltante / (60 * 60 * 1000))
         const minutos = Math.floor((tiempoFaltante % (60 * 60 * 1000)) / (60 * 1000))
         
-        return m.reply(`⏳ Los túneles están colapsados, fiera. Regresa en *${horas}h ${minutos}m* para excavar de nuevo. 🕷️`)
+        return m.reply(`⏳ Los túneles están colapsados mi amor. Regresa en *${horas}h ${minutos}m* para excavar de nuevo. 🕷️`)
     }
 
     const poolMinerales = [
