@@ -7,12 +7,8 @@ let handler = async (m, { conn }) => {
 
     // 📞 Lista de creadores ordenada según lo solicitado
     const users = [
-      { nombre: '♡ 𝓐𝓪𝓻𝓸𝓶 - 𝑪𝒓𝒆𝒂𝒅𝒐𝒓 ♡', numero: '573107400303' },
+      { nombre: '♡ Criss-fv - 𝑪𝒓𝒆𝒂𝒅𝒐𝒓 ♡', numero: '526653470605' },
       { nombre: '♡ Duarte - 𝑪𝒓𝒆𝒂𝒅𝒐𝒓 ♡', numero: '573135180876' },
-      { nombre: '♡ Carlos - 𝑪𝒓𝒆𝒂𝒅𝒐𝒓 ♡', numero: '5355699866' },
-      { nombre: '♡ litlee - 𝑪𝒓𝒆𝒂𝒅𝒐𝒓 ♡', numero: '525911153853' },
-      { nombre: '♡ Gura bot ofc - 𝑪𝒓𝒆𝒂𝒅𝒐𝒓 ♡', numero: '573133374132' },
-      { nombre: '♡ Gabriel - 𝑪𝒓𝒆𝒂𝒅𝒐𝒓 ♡', numero: '51941658192' },
       { nombre: '♡ Yosua - 𝑪𝒓𝒆𝒂𝒅𝒐𝒓 ♡', numero: '584242773183' }
     ];
 
@@ -22,7 +18,7 @@ let handler = async (m, { conn }) => {
     });
 
     // 💬 Mensaje estilo anime actualizado
-    let texto = `╭━━━〔 ♡ 𝒁𝒆𝒓𝒐 𝑻𝒘𝒐 ♡ 〕━━━⬣
+    let texto = `╭━━━〔 ♡ 𝑺𝒉𝒊𝒛𝒖𝒌𝒖 ♡ 〕━━━⬣
 ┃ ❥ Aquí están mis creadores
 ┃ ❥ Puedes hablar con ellos si me necesitas
 ┃ ❥ No seas tímido... 💗
@@ -46,7 +42,7 @@ let handler = async (m, { conn }) => {
 };
 
 handler.help = ['owner'];
-handler.tags = ['main'];
+handler.tags = ['general'];
 handler.command = ['owner', 'creator', 'creador', 'dueño'];
 
 export default handler;
