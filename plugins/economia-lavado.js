@@ -107,12 +107,9 @@ const handler = async (m, { conn, args, command }) => {
     }
 }
 
-handler.help = ['tienda', 'comprar <id>', 'vender <id>', 'recaudar']
+handler.help = ['tienda', 'comprar', 'vender', 'recaudar']
 handler.tags = ['economia']
-handler.command = ['tienda', 'comprar', 'vender', 'recaudar']
-handler.command = ['comprar']
-handler.command = ['vender']
-handler.command = ['recaudar']
+handler.command = /^(tienda|comprar|vender|recaudar)$/i
 handler.register = true
 
 export default handler
