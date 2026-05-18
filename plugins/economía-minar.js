@@ -21,7 +21,7 @@ const handler = async (m, { conn }) => {
 
     const ahora = Date.now()
     const tiempoTranscurrido = ahora - user.eco.lastmine
-    const dosHoras = 2 * 60 * 60 * 1000
+    const dosHoras = 5 * 60 * 1000
 
     if (tiempoTranscurrido < dosHoras && user.eco.lastmine !== 0) {
         const tiempoFaltante = dosHoras - tiempoTranscurrido
