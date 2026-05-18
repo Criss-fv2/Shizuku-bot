@@ -109,7 +109,8 @@ const handler = async (m, { conn, args, command }) => {
 
 handler.help = ['tienda', 'comprar', 'vender', 'recaudar']
 handler.tags = ['economia']
-handler.command = /^(tienda|comprar|vender|recaudar)$/i
+handler.command = ['tienda', 'comprar', 'vender', 'recaudar']
 handler.register = true
 
 export default handler
+
