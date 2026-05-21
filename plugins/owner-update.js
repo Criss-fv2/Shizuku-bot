@@ -1,37 +1,45 @@
-import { exec } from 'child_process';
+import { exec } from 'child_process'
 
 const handler = async (m, { conn }) => {
-    let sentMsg = await m.reply('💢 Actualizando para mi darling... espera un momento~ 🌸');
+    let sentMsg = await m.reply('🕷 *Shizuku System*\n\n🖤 Iniciando actualización...')
 
-    exec('git pull', (err, stdout, stderr) => {
+    exec('git pull origin main', (err, stdout, stderr) => {
         if (err) {
-            conn.sendMessage(m.chat, { text: '💔 Hmph... algo salió mal, darling. Déjame intentarlo a la fuerza~ 💢', edit: sentMsg.key }, { quoted: m });
-
-            exec('git reset --hard origin/main && git pull', (err2, stdout2, stderr2) => {
+            exec('git fetch origin && git reset --hard origin/main', (err2, stdout2, stderr2) => {
                 if (err2) {
-                    conn.sendMessage(m.chat, { text: `💔 Ni siquiera yo pude lograrlo, darling...\nRazón: ${err2.message}`, edit: sentMsg.key }, { quoted: m });
-                    return;
+                    conn.sendMessage(m.chat, {
+                        text: `🕸 *Shizuku System*\n\n🖤 Error al actualizar\n\`\`\`${err2.message.slice(0, 300)}\`\`\``,
+                        edit: sentMsg.key
+                    }, { quoted: m })
+                    return
                 }
 
-                if (stderr2) console.warn(stderr2);
-                conn.sendMessage(m.chat, { text: `🌸 Lo hice a mi manera y funcionó, darling~\n\n${stdout2}`, edit: sentMsg.key }, { quoted: m });
-            });
-            return;
+                conn.sendMessage(m.chat, {
+                    text: `🕷 *Shizuku System*\n\n🖤 Actualización forzada completada\n\n🕸 Archivos actualizados:\n\`\`\`${stdout2 || 'Sin cambios detectados'}\`\`\``,
+                    edit: sentMsg.key
+                }, { quoted: m })
+            })
+            return
         }
-
-        if (stderr) console.warn(stderr);
 
         if (stdout.includes('Already up to date.')) {
-            conn.sendMessage(m.chat, { text: '🍬 Todo ya estaba en orden, darling~ No había nada que actualizar.', edit: sentMsg.key }, { quoted: m });
+            conn.sendMessage(m.chat, {
+                text: '🕷 *Shizuku System*\n\n🖤 Ya estaba todo al día\n🕸 No había cambios que descargar',
+                edit: sentMsg.key
+            }, { quoted: m })
         } else {
-            conn.sendMessage(m.chat, { text: `🌸 Actualización completada con éxito, darling~!\n\n${stdout}`, edit: sentMsg.key }, { quoted: m });
+            conn.sendMessage(m.chat, {
+                text: `🕷 *Shizuku System*\n\n🖤 Actualización completada\n\n🕸 Cambios descargados:\n\`\`\`${stdout}\`\`\``,
+                edit: sentMsg.key
+            }, { quoted: m })
         }
-    });
-};
+    })
+}
 
-handler.help = ['update'];
-handler.tags = ['owner'];
-handler.command = ['update'];
-handler.owner = true;
+handler.help = ['update']
+handler.tags = ['owner']
+handler.command = ['update']
+handler.owner = true
 
-export default handler;
+
+export default handler
