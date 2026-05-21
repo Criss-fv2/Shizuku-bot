@@ -9,7 +9,7 @@ let handler = async (m, { isOwner }) => {
 
 handler.help = ['sistema']
 handler.tags = ['owner']
-handler.command = ['logs']
+handler.command = ['sistema']
 handler.owner = true
 
 export default handler
