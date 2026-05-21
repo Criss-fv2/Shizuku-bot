@@ -218,6 +218,18 @@ async function startBot () {
   log.success(`Conectado como: ${conn.user?.name || 'Desconocido'}`)
   log.info(`Plugins cargados: ${plugins.size}`)
   await loadEvents(conn)
+  // 🕷 Aviso de reinicio exitoso
+  try {
+    const { RESTART_FILE } = await import('./plugins/owner-restart.js')
+    if (fs.existsSync(RESTART_FILE)) {
+      const data = JSON.parse(fs.readFileSync(RESTART_FILE, 'utf-8'))
+      const tiempo = Math.round((Date.now() - data.time) / 1000)
+      await conn.sendMessage(data.chat, {
+        text: `🕷 *${global.botTag}*\n\n🕸 Sistema reiniciado correctamente\n🕷 Tiempo: ${tiempo} segundos\n\n${global.dev}`
+      })
+      fs.unlinkSync(RESTART_FILE)
+    }
+  } catch {}
 }
 
     if (connection === 'close') {
