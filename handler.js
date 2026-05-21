@@ -3,6 +3,7 @@ import chalk from 'chalk'
 import print from './lib/print.js'
 import { smsg } from './lib/simple.js'
 import { database } from './lib/database.js'
+import { writeLog } from './lib/logger.js'
 import { readdirSync } from 'fs'
 import { join, resolve } from 'path'
 import { pathToFileURL } from 'url'
@@ -247,6 +248,7 @@ export const handler = async (m, conn, plugins) => {
 
         // ── EJECUTAR ──────────────────────────────────────────────────────────
         try {
+           writeLog('CMD', m.sender.split('@')[0], commandName)
             await cmd(m, {
                 conn,
                 args,
@@ -269,6 +271,7 @@ export const handler = async (m, conn, plugins) => {
                 if (match) { file = match[1]; line = match[2]; break }
             }
             const debug = `⸸ *Error*\n📌 ${p}${commandName}\n🧾 ${msg.slice(0, 400)}\n📍 ${file}:${line}`
+           writeLog('ERROR', m.sender.split('@')[0], commandName, msg.slice(0, 100))
             console.log(chalk.red(debug))
             if (m?.reply) m.reply(debug)
         }
