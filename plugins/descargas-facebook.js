@@ -1,5 +1,5 @@
 import axios from 'axios'
-const FB_API  = 'https://api.alyacore.xyz/dl/facebookv2'
+const FB_API  = 'https://api.alyacore.xyz/dl/facebook'
 const FB_KEY  = 'Shizuku-System'   
 
 
