@@ -238,6 +238,14 @@ export const handler = async (m, conn, plugins) => {
 
         // ── CHECKS ────────────────────────────────────────────────────────────
         const p = usedPrefix || '.'
+        if (isGroup && database.data.groups[m.chat]?.bot === false && !isOwner && !isAdmin && !/^bot$/i.test(commandName))
+        return m.reply(
+        `🕷 *${global.botTag}*\n` +
+        `┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄\n` +
+        `🕸 El bot está desactivado en este grupo\n` +
+        `┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄\n` +
+        `${global.author}`
+    )
         if (isGroup && database.data.groups[m.chat]?.modoadmin && !isAdmin && !isOwner)
             return m.reply(`✠ ══〔 𝕾𝖍𝖎𝖟𝖚𝖐𝖚 𝕾𝖞𝖘𝖙𝖊𝖒 〕══ ✠\n\n🔒 *Modo Admin activo.*\n_Solo admins pueden invocar comandos._`)
         if (database.data.users[m.sender]?.banned && !isOwner)
