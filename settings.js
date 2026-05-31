@@ -7,7 +7,7 @@ const scriptPath = fileURLToPath(import.meta.url)
 
 // ─── OWNERS ─────────────────────────────────────────────────────────────────
 global.owner = [
-    ['5216653470605', 'Dev1', true],
+    ['5216653470605', '​𝑪𝒓𝒊𝒔𝒔-𝒇𝒗𝟐', true],
     ['5216644847052','dev2', true],
     ['9779829141452',  'dev3', true],
     ['573135180876', 'duarte soporte', true]
