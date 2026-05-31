@@ -1,7 +1,7 @@
 import fetch from 'node-fetch'
 
 const API     = 'https://api.alyacore.xyz/search/apk'
-const API_KEY = global.apiConfigs?.stellar?.extraKey || '1bcd4698ce6c75217275c9607f01fd99'
+const API_KEY = global.apiConfigs?.alyacore?.key || 'Shizuku-bot'
 const MAX_MB  = 95
 const MAX_B   = MAX_MB * 1024 * 1024
 const UA      = 'Mozilla/5.0 (Linux; Android 13; Pixel 7) AppleWebKit/537.36'
