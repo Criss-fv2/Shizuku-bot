@@ -169,6 +169,7 @@ global.sendWithCtx = global.invocar
 
 // ─── APIs ────────────────────────────────────────────────────────────────────
 global.apiConfigs = {
+   alyacore: { baseUrl: 'https://api.alyacore.xyz', key: 'Shizuku-bot' },
     stellar:   { baseUrl: 'https://api.stellarwa.xyz',   key: 'YukiWaBot', extraKey: '1bcd4698ce6c75217275c9607f01fd99' },
     xyro:      { baseUrl: 'https://api.xyro.site',        key: null },
     yupra:     { baseUrl: 'https://api.yupra.my.id',      key: null },
