@@ -146,6 +146,16 @@ export const handler = async (m, conn, plugins) => {
             }
         }
 
+       for (const [, p] of plugins) {
+    if (typeof p?.before !== 'function') continue
+    try {
+        const result = await p.before(m, { conn, plugins })
+        if (result === false) return
+    } catch (e) {
+        console.error('[BEFORE ERROR]', e?.message)
+    }
+       }
+        
         // Silenciar
         if (m.isGroup) {
             const muted = database.data?.groups?.[m.chat]?.muted || []
