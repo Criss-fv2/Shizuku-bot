@@ -146,7 +146,8 @@ export const handler = async (m, conn, plugins) => {
             }
         }
 
-       for (const [, p] of plugins) {
+       // ── BEFORE: filtros y respuestas previas al parseo de comandos ───────
+for (const [, p] of plugins) {
     if (typeof p?.before !== 'function') continue
     try {
         const result = await p.before(m, { conn, plugins })
@@ -154,7 +155,7 @@ export const handler = async (m, conn, plugins) => {
     } catch (e) {
         console.error('[BEFORE ERROR]', e?.message)
     }
-       }
+}
         
         // Silenciar
         if (m.isGroup) {
