@@ -1,12 +1,12 @@
 import axios from 'axios'
 import yts from 'yt-search'
 
-// ─── CONFIG ──────────────────────────────────────────────────────────────────
+
 const KEY     = 'Shizuku-bot'
 const BASE    = 'https://api.alyacore.xyz/dl'
 const TIMEOUT = 12000   
 
-// ─── HELPERS ─────────────────────────────────────────────────────────────────
+
 const HEADER = () => `🕷 *${global.botTag}*\n┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄`
 const FOOTER = () => `┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄\n${global.author}`
 
@@ -20,7 +20,7 @@ async function fetchEndpoint(endpoint, url) {
     return dl
 }
 
-// ─── CARRERA PARALELA — devuelve la primera API que responda con éxito ────────
+
 async function raceApis(ytUrl) {
     const apis = ['ytmp3', 'ytmp3v2', 'ytmp3v3']
 
@@ -42,7 +42,7 @@ async function raceApis(ytUrl) {
     })
 }
 
-// ─── HANDLER ─────────────────────────────────────────────────────────────────
+
 const handler = async (m, { conn, text, usedPrefix, command }) => {
     if (!text) return m.reply(
         `${HEADER()}\n` +
@@ -60,7 +60,7 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
     let ytUrl     = query
     let videoInfo = null
 
-    // ── Búsqueda por texto ────────────────────────────────────────────────────
+    
     if (!isUrl) {
         try {
             const { videos } = await yts(query)
@@ -85,7 +85,7 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
         }
     }
 
-    // ── Info del video (se envía mientras las APIs trabajan en paralelo) ───────
+    
     if (videoInfo) {
         const infoMsg =
             `${HEADER()}\n` +
@@ -122,7 +122,7 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
         return await m.react('✅')
     }
 
-    // ── URL directa ───────────────────────────────────────────────────────────
+    
     let dlUrl
     try {
         dlUrl = await raceApis(ytUrl)
