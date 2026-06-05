@@ -8,6 +8,7 @@ import fs from 'fs';
 import path from 'path';
 import chalk from 'chalk';
 import { smsg, patchGroupMetadata } from '#serialize';
+import db from '#db';
 
 if (!global.conns) global.conns = [];
 let reintentos = {};
@@ -100,9 +101,9 @@ export async function startSubBot(msg, client, caption = '', isCode = false, pho
       socks.uptime = Date.now();
       socks.userId = cleanJid(socks.user?.id?.split('@')[0]);
       const botDir = socks.userId + '@s.whatsapp.net';
-      const settings = global.db.data.settings[botDir] || {};
+      const settings = db.getSettings(botDir);
       settings.type = 'Sub';
-      global.db.data.settings[botDir].type = settings.type;
+      db.setSettings(botDir, 'type', settings.type);
       const conss = global.conns.findIndex((c) => c.userId === socks.userId);
       if (conss !== -1) { global.conns[conss] = socks; } else { global.conns.push(socks); }
       delete reintentos[socks.userId || id];
@@ -176,8 +177,8 @@ export default {
   category: 'socket',
   description: 'Gestionar bots subbots.',
   run: async ({ msg, sock, args, command, __dirname }) => {
-    (global.db.data.users[msg.sender].Subs ??= 0);
-    const user = global.db.data.users[msg.sender];
+    db.setCreate('users', msg.sender, 'Subs', 0);
+    const user = db.getUser(msg.sender);
     if (Date.now() - user.Subs < 80000) {
       const remainingTime = (user.Subs + 80000) - Date.now();
       return sock.reply(msg.chat, `ꕥ Debes esperar *${msToTime(remainingTime)}* para volver a intentar vincular un socket.`, msg);
@@ -207,6 +208,6 @@ export default {
     const rawPhone = separatorIndex === -1 ? fullArgs.trim() : fullArgs.slice(separatorIndex + 1).trim();
     const phone = normalizePhone(rawPhone || msg.sender.split('@')[0]);
     await startSubBot(msg, sock, caption, isCode, phone, msg.chat, isCommand);
-    global.db.data.users[msg.sender].Subs = Date.now();
+    db.setUser(msg.sender, 'Subs', Date.now());
   },
 };

@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import db from '#db';
 
 function getBotsFromFolder(basePath, folderName) {
   const folderPath = path.join(basePath, folderName);
@@ -32,7 +33,7 @@ export default {
     const isAll = args[0]?.toLowerCase() === 'all';
     const groupMetadata = msg.isGroup ? await sock.groupMetadata(from).catch(() => {}) : '';
     const groupParticipants = (groupMetadata?.participants || []).map(p => p.id);
-    const mainBotJid = (global.sock.user.id.split(':')[0] + '@s.whatsapp.net');
+    const mainBotJid = ((global.sock?.user?.id?.split(':')[0] ?? null) && (global.sock.user.id.split(':')[0] + '@s.whatsapp.net'));
     const basePath = path.join(__dirname, '../../Sessions');
     const activeBots = getActiveBotNumbers();
     const allSubs = getBotsFromFolder(basePath, 'Subs');
@@ -43,14 +44,14 @@ export default {
       const jid = number + '@s.whatsapp.net';
       if (!groupParticipants.includes(jid)) return null;
       mentionedJid.push(jid);
-      const data = global.db.data.settings[jid];
+      const data = db.getSettings(jid);
       const name = data?.namebot || 'Bot';
       return `- [${label} *${name}*] › @${number}`;
     };
     const formatBotAll = async (number, label) => {
       const jid = number + '@s.whatsapp.net';
       mentionedJid.push(jid);
-      const data = global.db.data.settings[jid];
+      const data = db.getSettings(jid);
       const name = data?.namebot || 'Bot';
       return `- [${label} *${name}*] › @${number}`;
     };
@@ -59,7 +60,7 @@ export default {
     if (isMainActive && mainBotJid) {
       const inGroup = groupParticipants.includes(mainBotJid);
       if (isAll || inGroup) {
-        const data = global.db.data.settings[mainBotJid];
+        const data = db.getSettings(mainBotJid);
         const name = data?.namebot || 'Bot';
         const number = mainBotJid.split('@')[0];
         mentionedJid.push(mainBotJid);

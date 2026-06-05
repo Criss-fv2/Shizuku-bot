@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { jidDecode } from 'baileys';
+import db from '#db';
 
 export default {
   command: ['logout'],
@@ -8,7 +9,7 @@ export default {
   description: 'Cerrar sesión del bot.',
   run: async ({ msg, sock, usedPrefix, command }) => {
     const idBot = sock.user.id.split(':')[0] + '@s.whatsapp.net';
-    const config = global.db.data.settings[idBot] || {};
+    const config = db.getSettings(idBot) || {};
     const isOwner2 = [idBot, ...(config.owner ? [config.owner] : []), ...global.owner.map(num => num + '@s.whatsapp.net')].includes(msg.sender);
     if (!isOwner2) return sock.reply(msg.chat, global.mess.socket, msg);
     const rawId = sock.user?.id || '';

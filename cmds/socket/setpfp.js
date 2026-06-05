@@ -1,4 +1,5 @@
 import * as Jimp from 'jimp';
+import db from '#db';
 
 async function resizeImage(media) {
   const jimp = await Jimp.read(media);
@@ -14,7 +15,7 @@ export default {
   description: 'Cambiar la imagen de perfil del bot.',
   run: async ({ msg, sock, args }) => {
     const idBot = sock.user.id.split(':')[0] + '@s.whatsapp.net';
-    const config = global.db.data.settings[idBot] || {};
+    const config = db.getSettings(idBot) || {};
     const isOwner2 = [idBot, ...(config.owner ? [config.owner] : []), ...global.owner.map(num => num + '@s.whatsapp.net')].includes(msg.sender);
     if (!isOwner2) return msg.reply(global.mess.socket);
     const q = msg.quoted || msg;
