@@ -1,4 +1,5 @@
 import moment from 'moment';
+import db from '#db';
 moment.locale('es');
 
 export default {
@@ -6,7 +7,7 @@ export default {
   category: 'profile',
   description: 'Establecer tu fecha de cumpleaños.',
   run: async ({ msg, args, usedPrefix, command, text }) => {
-    const user = global.db.data.users[msg.sender];
+    const user = db.getUser(msg.sender);
     const currentYear = new Date().getFullYear();
     const input = args.join(' ');    
     if (!input) return msg.reply(`《✧》 Debes ingresar una fecha válida para tu cumpleaños.\n✐ Ejemplos:\n> ${usedPrefix + command} *01/01/2000* (día/mes/año)\n> ${usedPrefix + command} *01/01* (día/mes/año)`);
@@ -15,7 +16,7 @@ export default {
       return msg.reply(birth);
     if (!birth)
       return msg.reply(`《✧》 Fecha inválida. Usa › *${usedPrefix + command} 01/01/2000*`);
-    global.db.data.users[msg.sender].birth = birth;
+    db.setUser(msg.sender, 'birth', birth);
     return msg.reply(`✎ Se ha establecido tu fecha de nacimiento como: *${birth}*`);
   },
 };

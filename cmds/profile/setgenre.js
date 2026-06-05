@@ -1,9 +1,10 @@
+import db from '#db';
 export default {
   command: ['setgenre'],
   category: 'profile',
   description: 'Establecer tu género.',
   run: async ({ msg, args, usedPrefix, command }) => {
-    const user = global.db.data.users[msg.sender];
+    const user = db.getUser(msg.sender);
     const input = args.join(' ').toLowerCase();
     if (!input) return msg.reply(`《✧》 Debes ingresar un género válido.\n✎ Ejemplos:\n> *${usedPrefix + command} hombre*\n> *${usedPrefix + command} mujer*`);    
     const genresList = ['Hombre', 'Mujer', 'Femboy', 'Transgénero', 'Gay', 'Lesbiana', 'No Binario', 'Pansexual', 'Bisexual', 'Asexual', 'Therian'];
@@ -21,7 +22,7 @@ export default {
       const opciones = genresList.map((g, i) => `${i + 1}. ${g}`).join('\n');
       return msg.reply(`《✧》 Elije un género válido.\n\nOpciones:\n${opciones}`);
     }    
-    global.db.data.users[msg.sender].genre = genre;
+    db.setUser(msg.sender, 'genre', genre);
     return msg.reply(`✎ Se ha establecido tu género como: *${genre}*`);
   },
 };

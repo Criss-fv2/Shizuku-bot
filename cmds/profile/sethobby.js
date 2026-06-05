@@ -1,9 +1,10 @@
+import db from '#db';
 export default {
   command: ['setpasatiempo', 'sethobby'],
   category: 'profile',
   description: 'Establecer tu pasatiempo.',
   run: async ({ msg, args, usedPrefix }) => {
-    const user = global.db.data.users[msg.sender];
+    const user = db.getUser(msg.sender);
     const input = args.join(' ').trim();    
     const pasatiemposDisponibles = [
       '📚 Leer', '✍️ Escribir', '🎤 Cantar', '💃 Bailar', '🎮 Jugar', 
@@ -49,7 +50,7 @@ export default {
     if (user.pasatiempo === pasatiempoSeleccionado) {
       return msg.reply(`《✧》 Ya tienes establecido este pasatiempo: *${user.pasatiempo}*`);
     }    
-    global.db.data.users[msg.sender].pasatiempo = pasatiempoSeleccionado;
+    db.setUser(msg.sender, 'pasatiempo', pasatiempoSeleccionado);
     return msg.reply(`✐ Se ha establecido tu pasatiempo:\n> *${pasatiempoSeleccionado}*`);
   },
 };

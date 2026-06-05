@@ -1,4 +1,5 @@
 import moment from 'moment-timezone';
+import db from '#db';
 
 const growth = Math.pow(Math.PI / Math.E, 1.618) * Math.E * 0.75;
 
@@ -16,23 +17,23 @@ export default {
   description: 'Ver tu perfil o el de un usuario.',
   run: async ({ msg, sock, usedPrefix, command }) => {
     const userId = msg.mentionedJid?.[0] || msg.quoted?.sender || msg.sender;
-    (global.db.data.chats[msg.chat]?.users?.[userId] && (global.db.data.chats[msg.chat].users[userId].favorite ??= ''));
-    const chat = global.db.data.chats[msg.chat] || {};
-    let user = global.db.data.chats[msg.chat]?.users?.[userId];    
+    db.setCreate('chat_users', [msg.chat, userId], 'favorite', '');
+    const chat = db.getChat(msg.chat) || {};
+    let user = db.getChatUser(msg.chat, userId);    
     if (!user) {
       return msg.reply('✎ El usuario *mencionado* no está *registrado* en el bot');
     }
     const idBot = sock.user.id.split(':')[0] + '@s.whatsapp.net' || '';
-    const settings = global.db.data.settings[idBot] || {};
+    const settings = db.getSettings(idBot) || {};
     const currency = settings.currency || '';
-    const user2 = global.db.data.users[userId] || {};
+    const user2 = db.getUser(userId) || {};
     const name = user2.name || '';
     const birth = user2.birth || 'Sin especificar';
     const genero = user2.genre || 'Oculto';
     const comandos = user2.usedcommands || '0';    
     let pareja = 'Nadie';
     if (user2.marry) {
-      const partner = global.db.data.users[user2.marry];
+      const partner = db.getUser(user2.marry) || {};
       pareja = partner?.name || 'Alguien';
     }
     const estadoCivil = genero === 'Mujer' ? 'Casada con' : genero === 'Hombre' ? 'Casado con' : 'Casadx con';
@@ -46,7 +47,7 @@ export default {
     const favId = user.favorite;
     let favLine = '';
     if (favId) {
-      const character = global.global.db.data.characters[favId];
+      const character = db.getCharacter(favId);
       if (character) {
         favLine = `\n๑ Claim favorito » *${character.name || '???'}*`;
       }
@@ -54,14 +55,14 @@ export default {
     const ownedIDs = Array.isArray(user.characters) ? user.characters : [];
     let haremValue = 0;    
     for (const id of ownedIDs) {
-      const character = global.global.db.data.characters[id];
+      const character = db.getCharacter(id);
       if (character) {
         haremValue += character.value || 0;
       }
     }    
     const haremCount = ownedIDs.length;
     const perfil = await sock.profilePictureUrl(userId, 'image').catch((_) => 'https://cdn.yuki-wabot.my.id/files/2PVh.jpeg');    
-    const allUsers = Object.values(global.db.data.users) || [];
+    const allUsers = db.getUser() || [];
     const users = Array.isArray(allUsers) ? allUsers.map(u => ({ ...u, jid: u.id })) : [];
     const sortedLevel = users.sort((a, b) => (b.level || 0) - (a.level || 0));    
     try {

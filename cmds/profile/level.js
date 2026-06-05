@@ -1,3 +1,4 @@
+import db from '#db';
 
 const growth = Math.pow(Math.PI / Math.E, 1.618) * Math.E * 0.75;
 
@@ -16,11 +17,11 @@ export default {
   run: async ({ msg, sock, text }) => {
     const chatId = msg.chat;
     const who = msg.mentionedJid?.[0] || msg.quoted?.sender || msg.sender;
-    const user = global.db.data.users[who];
+    const user = db.getUser(who);
     if (!user) {
       return msg.reply(`「✎」 El usuario mencionado no está registrado en el bot.`);
     }
-    const allUsers = Object.values(global.db.data.users);
+    const allUsers = db.getUser();
     const users = allUsers.map(u => ({ ...u, jid: u.id }));
     const sortedLevel = users.sort((a, b) => (b.level || 0) - (a.level || 0));
     const rank = sortedLevel.findIndex(u => u.jid === who) + 1;

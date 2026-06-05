@@ -1,3 +1,4 @@
+import db from '#db';
 const growth = Math.pow(Math.PI / Math.E, 1.618) * Math.E * 0.75;
 
 function xpRange(level, multiplier = global.multiplier || 2) {
@@ -14,7 +15,7 @@ export default {
   description: 'Top de usuarios con más experiencia.',
   run: async ({ msg, sock, args, usedPrefix, command, text }) => {
     try {
-      const allUsers = Object.values(global.db.data.users);      
+      const allUsers = db.getUser();      
       const users = allUsers.filter(user => (user.exp || 0) >= 1).map(user => {
         const name = user.name || 'Usuario';
         const exp = user.exp || 0;
