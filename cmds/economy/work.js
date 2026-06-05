@@ -1,25 +1,26 @@
+import db from '#db';
 export default {
   command: ['w', 'work', 'chambear', 'trabajar'],
   category: 'economy',
   description: 'Ganar coins trabajando.',
   run: async ({ msg, sock, usedPrefix, command, text }) => {
-    const chat = global.db.data.chats[msg.chat];
+    const chat = db.getChat(msg.chat);
     if (chat.adminonly || !chat.economy) {
       return msg.reply(`ꕥ Los comandos de *Economía* están desactivados en este grupo.\n\nUn *administrador* puede activarlos con el comando:\n» *${usedPrefix}economy on*`);
     }
     const botId = sock.user.id.split(':')[0] + '@s.whatsapp.net';
-    const settings = global.db.data.settings[botId];
+    const settings = db.getSettings(botId);
     const monedas = settings.currency;
-    (global.db.data.chats[msg.chat]?.users?.[msg.sender] && (global.db.data.chats[msg.chat].users[msg.sender].lastwork ??= 0));
-    const user = global.db.data.chats[msg.chat]?.users?.[msg.sender];
+    db.setCreate('chat_users', [msg.chat, msg.sender], 'lastwork', 0);
+    const user = db.getChatUser(msg.chat, msg.sender);
     const cooldown = 3 * 60 * 1000;
     if (Date.now() < user.lastwork) {
       const tiempoRestante = formatTime(user.lastwork - Date.now());
       return sock.reply(msg.chat, `ꕥ Debes esperar *${tiempoRestante}* para usar *${usedPrefix + command}* de nuevo.`, msg);
     }
     const rsl = Math.floor(Math.random() * (4000 - 2000 + 1)) + 2000;
-    global.db.data.chats[msg.chat].users[msg.sender].lastwork = Date.now( + cooldown);
-    global.db.data.chats[msg.chat].users[msg.sender].coins = (user.coins || 0 + rsl);    
+    db.setChatUser(msg.chat, msg.sender, 'lastwork', Date.now() + cooldown);
+    db.setChatUser(msg.chat, msg.sender, 'coins', (user.coins || 0) + rsl);    
     await sock.sendMessage(msg.chat, { text: `❀ ${pickRandom(trabajo)} *¥${rsl.toLocaleString()} ${monedas}*.` }, { quoted: msg });
   }
 };

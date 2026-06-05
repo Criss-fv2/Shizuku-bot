@@ -1,17 +1,18 @@
+import db from '#db';
 export default {
   command: ['cofre', 'coffer'],
   category: 'economy',
   description: 'Reclamar tu cofre diario.',
   run: async ({ msg, sock, usedPrefix }) => {
-    const chat = global.db.data.chats[msg.chat];
+    const chat = db.getChat(msg.chat);
     if (chat.adminonly || !chat.economy) {
       return msg.reply(`ꕥ Los comandos de *Economía* están desactivados en este grupo.\n\nUn *administrador* puede activarlos con el comando:\n» *${usedPrefix}economy on*`);
     }        
     const botId = sock.user.id.split(':')[0] + '@s.whatsapp.net';
-    const bot = global.db.data.settings[botId];
+    const bot = db.getSettings(botId);
     const currency = bot.currency;
-    (global.db.data.chats[msg.chat]?.users?.[msg.sender] && (global.db.data.chats[msg.chat].users[msg.sender].lastcoffer ??= 0));
-    const user = global.db.data.chats[msg.chat]?.users?.[msg.sender];
+    db.setCreate('chat_users', [msg.chat, msg.sender], 'lastcoffer', 0);
+    const user = db.getChatUser(msg.chat, msg.sender);
     const now = Date.now();
     const gap = 24 * 60 * 60 * 1000;
     if (now < user.lastcoffer) {
@@ -23,7 +24,7 @@ export default {
     let message = "";
     if (rand < 0.5) {
       reward = 25000;
-      global.db.data.chats[msg.chat].users[msg.sender].coins = (user.coins || 0 + reward);
+      db.setChatUser(msg.chat, msg.sender, 'coins', (user.coins || 0) + reward);
       const normalMessages = [
         `「✿」 Has abierto un cofre normal y recibiste *¥${reward.toLocaleString()} ${currency}*.`,
         `「✿」 El cofre común contenía monedas brillantes, ganaste *¥${reward.toLocaleString()} ${currency}*.`,
@@ -36,7 +37,7 @@ export default {
       message = pickRandom(normalMessages);
     } else if (rand < 0.8) {
       reward = 40000;
-      global.db.data.chats[msg.chat].users[msg.sender].coins = (user.coins || 0 + reward);
+      db.setChatUser(msg.chat, msg.sender, 'coins', (user.coins || 0) + reward);
       const legendaryMessages = [
         `「✿」 ¡Increíble! Abriste un cofre legendario y recibiste *¥${reward.toLocaleString()} ${currency}*.`,
         `「✿」 El cofre legendario brillaba con luz dorada, dentro había *¥${reward.toLocaleString()} ${currency}*.`,
@@ -61,7 +62,7 @@ export default {
       ];
       message = pickRandom(emptyMessages);
     }
-    global.db.data.chats[msg.chat].users[msg.sender].lastcoffer = now + gap;
+    db.setChatUser(msg.chat, msg.sender, 'lastcoffer', now + gap);
     msg.reply(message);
   }
 };

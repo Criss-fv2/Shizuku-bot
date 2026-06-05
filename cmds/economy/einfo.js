@@ -1,3 +1,4 @@
+import db from '#db';
 const formatTime = (ms) => {
   const totalSeconds = Math.floor(ms / 1000);
   const days = Math.floor(totalSeconds / 86400);
@@ -19,27 +20,27 @@ export default {
   run: async ({ msg, sock, usedPrefix, text }) => {
     const chatId = msg.chat;
     const botId = sock.user.id.split(':')[0] + "@s.whatsapp.net";
-    const chatData = global.db.data.chats[chatId];
+    const chatData = db.getChat(chatId);
     if (chatData.adminonly || !chatData.economy) {
       return msg.reply(`ꕥ Los comandos de *Economía* están desactivados en este grupo.\n\nUn *administrador* puede activarlos con el comando:\n» *${usedPrefix}economy on*`);
     }        
-    (global.db.data.chats[chatId]?.users?.[msg.sender] && (global.db.data.chats[chatId].users[msg.sender].lastcrime ??= 0));
-    (global.db.data.chats[chatId]?.users?.[msg.sender] && (global.db.data.chats[chatId].users[msg.sender].lastmine ??= 0));
-    (global.db.data.chats[chatId]?.users?.[msg.sender] && (global.db.data.chats[chatId].users[msg.sender].lastinvoke ??= 0));
-    (global.db.data.chats[chatId]?.users?.[msg.sender] && (global.db.data.chats[chatId].users[msg.sender].lastwork ??= 0));
-    (global.db.data.chats[chatId]?.users?.[msg.sender] && (global.db.data.chats[chatId].users[msg.sender].lastslut ??= 0));
-    (global.db.data.chats[chatId]?.users?.[msg.sender] && (global.db.data.chats[chatId].users[msg.sender].laststeal ??= 0));
-    (global.db.data.chats[chatId]?.users?.[msg.sender] && (global.db.data.chats[chatId].users[msg.sender].lasthunt ??= 0));
-    (global.db.data.chats[chatId]?.users?.[msg.sender] && (global.db.data.chats[chatId].users[msg.sender].lastfish ??= 0));
-    (global.db.data.chats[chatId]?.users?.[msg.sender] && (global.db.data.chats[chatId].users[msg.sender].lastcoffer ??= 0));
-    (global.db.data.chats[chatId]?.users?.[msg.sender] && (global.db.data.chats[chatId].users[msg.sender].lastdungeon ??= 0));
-    (global.db.data.chats[chatId]?.users?.[msg.sender] && (global.db.data.chats[chatId].users[msg.sender].lastadventure ??= 0));
-    (global.db.data.chats[chatId]?.users?.[msg.sender] && (global.db.data.chats[chatId].users[msg.sender].lastdaily ??= 0));
-    (global.db.data.chats[chatId]?.users?.[msg.sender] && (global.db.data.chats[chatId].users[msg.sender].lastweekly ??= 0));
-    (global.db.data.chats[chatId]?.users?.[msg.sender] && (global.db.data.chats[chatId].users[msg.sender].lastmonthly ??= 0));    
-    const user = global.db.data.chats[chatId]?.users?.[msg.sender];
-    const users = global.db.data.users[msg.sender];
-    const settings = global.db.data.settings[botId];
+    db.setCreate('chat_users', [chatId, msg.sender], 'lastcrime', 0);
+    db.setCreate('chat_users', [chatId, msg.sender], 'lastmine', 0);
+    db.setCreate('chat_users', [chatId, msg.sender], 'lastinvoke', 0);
+    db.setCreate('chat_users', [chatId, msg.sender], 'lastwork', 0);
+    db.setCreate('chat_users', [chatId, msg.sender], 'lastslut', 0);
+    db.setCreate('chat_users', [chatId, msg.sender], 'laststeal', 0);
+    db.setCreate('chat_users', [chatId, msg.sender], 'lasthunt', 0);
+    db.setCreate('chat_users', [chatId, msg.sender], 'lastfish', 0);
+    db.setCreate('chat_users', [chatId, msg.sender], 'lastcoffer', 0);
+    db.setCreate('chat_users', [chatId, msg.sender], 'lastdungeon', 0);
+    db.setCreate('chat_users', [chatId, msg.sender], 'lastadventure', 0);
+    db.setCreate('chat_users', [chatId, msg.sender], 'lastdaily', 0);
+    db.setCreate('chat_users', [chatId, msg.sender], 'lastweekly', 0);
+    db.setCreate('chat_users', [chatId, msg.sender], 'lastmonthly', 0);    
+    const user = db.getChatUser(chatId, msg.sender);
+    const users = db.getUser(msg.sender);
+    const settings = db.getSettings(botId);
     const now = Date.now();
     const oneDay = 24 * 60 * 60 * 1000;    
     const cooldowns = {

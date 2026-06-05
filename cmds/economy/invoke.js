@@ -1,18 +1,19 @@
+import db from '#db';
 export default {
   command: ['ritual', 'invoke', 'invocar'],
   category: 'economy',
   description: 'Hacer ritos de invocación.',
   run: async ({ msg, sock, usedPrefix }) => {
-    const chat = global.db.data.chats[msg.chat];
+    const chat = db.getChat(msg.chat);
     if (chat.adminonly || !chat.economy) {
       return msg.reply(`ꕥ Los comandos de *Economía* están desactivados en este grupo.\n\nUn *administrador* puede activarlos con el comando:\n» *${usedPrefix}economy on*`);
     }
     const botId = sock?.user?.id.split(':')[0] + '@s.whatsapp.net';
-    const botSettings = global.db.data.settings[botId];
+    const botSettings = db.getSettings(botId);
     const monedas = botSettings?.currency || 'Coins';
-    (global.db.data.chats[msg.chat]?.users?.[msg.sender] && (global.db.data.chats[msg.chat].users[msg.sender].inventory ??= {}));
-    (global.db.data.chats[msg.chat]?.users?.[msg.sender] && (global.db.data.chats[msg.chat].users[msg.sender].lastinvoke ??= 0));    
-    let user = global.db.data.chats[msg.chat]?.users?.[msg.sender];
+    db.setCreate('chat_users', [msg.chat, msg.sender], 'inventory', {});
+    db.setCreate('chat_users', [msg.chat, msg.sender], 'lastinvoke', 0);    
+    let user = db.getChatUser(msg.chat, msg.sender);
     if (user.inventory && typeof user.inventory === 'string') {
       try { user.inventory = JSON.parse(user.inventory); } catch { user.inventory = {}; }
     }    
@@ -39,12 +40,12 @@ export default {
     user.magic -= magicConsumed;
     user.health -= saludConsumed;
     user.inventory.totem -= 1;   
-    global.db.data.chats[msg.chat].users[msg.sender].stamina = user.stamina;
-    global.db.data.chats[msg.chat].users[msg.sender].magic = user.magic;
-    global.db.data.chats[msg.chat].users[msg.sender].health = user.health;
-    global.db.data.chats[msg.chat].users[msg.sender].inventory = user.inventory;    
+    db.setChatUser(msg.chat, msg.sender, 'stamina', user.stamina);
+    db.setChatUser(msg.chat, msg.sender, 'magic', user.magic);
+    db.setChatUser(msg.chat, msg.sender, 'health', user.health);
+    db.setChatUser(msg.chat, msg.sender, 'inventory', user.inventory);    
     user.lastinvoke = Date.now() + 12 * 60 * 1000;
-    global.db.data.chats[msg.chat].users[msg.sender].lastinvoke = user.lastinvoke;    
+    db.setChatUser(msg.chat, msg.sender, 'lastinvoke', user.lastinvoke);    
     const roll = Math.random();
     let reward = 0;
     let narration = '';
@@ -63,7 +64,7 @@ export default {
       }
     }    
     user.coins += reward;
-    global.db.data.chats[msg.chat].users[msg.sender].coins = user.coins;    
+    db.setChatUser(msg.chat, msg.sender, 'coins', user.coins);    
     let caption = `「✿」 ${narration}\nGanaste *${reward.toLocaleString()} ${monedas}*`;
     if (bonusMsg) caption += `\n${bonusMsg}`;
     await sock.reply(msg.chat, caption, msg);

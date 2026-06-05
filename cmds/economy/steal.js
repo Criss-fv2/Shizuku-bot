@@ -1,17 +1,18 @@
+import db from '#db';
 export default {
   command: ['robar', 'steal', 'rob'],
   category: 'economy',
   description: 'Intentar robar coins a un usuario.',
   run: async ({ msg, sock, usedPrefix, command }) => {
-    const chatData = global.db.data.chats[msg.chat];
+    const chatData = db.getChat(msg.chat);
     if (chatData.adminonly || !chatData.economy) {
       return msg.reply(`ꕥ Los comandos de *Economía* están desactivados en este grupo.\n\nUn *administrador* puede activarlos con el comando:\n» *${usedPrefix}economy on*`);
     }    
     const botId = sock.user.id.split(':')[0] + '@s.whatsapp.net';
-    const bot = global.db.data.settings[botId];
+    const bot = db.getSettings(botId);
     const currency = bot.currency;
-    (global.db.data.chats[msg.chat]?.users?.[msg.sender] && (global.db.data.chats[msg.chat].users[msg.sender].laststeal ??= 0));
-    const user = global.db.data.chats[msg.chat]?.users?.[msg.sender];    
+    db.setCreate('chat_users', [msg.chat, msg.sender], 'laststeal', 0);
+    const user = db.getChatUser(msg.chat, msg.sender);    
     if (Date.now() < user.laststeal) {
       const restante = user.laststeal - Date.now();
       return sock.reply(msg.chat, `ꕥ Debes esperar *${formatTime(restante)}* para usar *${usedPrefix + command}* de nuevo.`, msg);
@@ -20,11 +21,11 @@ export default {
     if (!who) {
       return sock.reply(msg.chat, `❀ Debes mencionar a alguien para intentar robarle.`, msg);
     }   
-    const target = global.db.data.chats[msg.chat]?.users?.[who];
+    const target = db.getChatUser(msg.chat, who);
     if (!target) {
       return sock.reply(msg.chat, `ꕥ El usuario no se encuentra en mi base de datos.`, msg);
     }    
-    const name = (global.db.data.users[who])?.name || who.split('@')[0];
+    const name = (db.getUser(who))?.name || who.split('@')[0];
     const lastCmd = target.lastCmd || 0;
     const tiempoInactivo = Date.now() - lastCmd;    
     if (tiempoInactivo < 3600000) {
@@ -36,27 +37,27 @@ export default {
       const total = (user.coins || 0) + (user.bank || 0);      
       if (total >= loss) {
         if (user.coins >= loss) {
-          global.db.data.chats[msg.chat].users[msg.sender].coins = (user.coins || 0 - loss);
+          db.setChatUser(msg.chat, msg.sender, 'coins', (user.coins || 0) - loss);
         } else {
           const restanteLoss = loss - (user.coins || 0);
-          global.db.data.chats[msg.chat].users[msg.sender].coins = 0;
-          global.db.data.chats[msg.chat].users[msg.sender].bank = Math.max(0, (user.bank || 0 - restanteLoss));
+          db.setChatUser(msg.chat, msg.sender, 'coins', 0);
+          db.setChatUser(msg.chat, msg.sender, 'bank', Math.max(0, (user.bank || 0) - restanteLoss));
         }
       } else {
         loss = total;
-        global.db.data.chats[msg.chat].users[msg.sender].coins = 0;
-        global.db.data.chats[msg.chat].users[msg.sender].bank = 0;
+        db.setChatUser(msg.chat, msg.sender, 'coins', 0);
+        db.setChatUser(msg.chat, msg.sender, 'bank', 0);
       }      
-      global.db.data.chats[msg.chat].users[msg.sender].laststeal = Date.now( + 3600000);
+      db.setChatUser(msg.chat, msg.sender, 'laststeal', Date.now() + 3600000);
       return sock.reply(msg.chat, `ꕥ El robo salió mal y perdiste *¥${loss.toLocaleString()} ${currency}*.`, msg);
     }    
     const rob = Math.floor(Math.random() * (9000 - 3000 + 1)) + 3000;    
     if ((target.coins || 0) < rob) {
       return sock.reply(msg.chat, `ꕥ *${name}* no tiene suficientes *${currency}* fuera del banco como para que valga la pena intentar robar.`, msg, { mentions: [who] });
     }    
-    global.db.data.chats[msg.chat].users[msg.sender].coins = (user.coins || 0 + rob);
-    global.db.data.chats[msg.chat].users[who].coins = (target.coins || 0 - rob);
-    global.db.data.chats[msg.chat].users[msg.sender].laststeal = Date.now( + 3600000);    
+    db.setChatUser(msg.chat, msg.sender, 'coins', (user.coins || 0) + rob);
+    db.setChatUser(msg.chat, who, 'coins', (target.coins || 0) - rob);
+    db.setChatUser(msg.chat, msg.sender, 'laststeal', Date.now() + 3600000);    
     sock.reply(msg.chat, `❀ Le robaste *¥${rob.toLocaleString()} ${currency}* a *${name}*`, msg, { mentions: [who] });
   }
 };

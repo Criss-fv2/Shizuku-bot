@@ -1,3 +1,4 @@
+import db from '#db';
 export default {
   command: ['withdraw', 'with', 'retirar'],
   category: 'economy',
@@ -5,14 +6,14 @@ export default {
   run: async ({ msg, sock, args, usedPrefix, command }) => {
     const chatId = msg.chat;
     const senderId = msg.sender;
-    const chatData = global.db.data.chats[chatId];
+    const chatData = db.getChat(chatId);
     if (chatData.adminonly || !chatData.economy) {
       return msg.reply(`ꕥ Los comandos de *Economía* están desactivados en este grupo.\n\nUn *administrador* puede activarlos con el comando:\n» *${usedPrefix}economy on*`);
     }
     const botId = sock.user.id.split(':')[0] + '@s.whatsapp.net';
-    const botSettings = global.db.data.settings[botId];
+    const botSettings = db.getSettings(botId);
     const currency = botSettings.currency
-    const user = global.db.data.chats[chatId]?.users?.[senderId];    
+    const user = db.getChatUser(chatId, senderId);    
     if (!args[0]) {
       return msg.reply(`《✧》 Ingresa la cantidad de *${currency}* que quieras retirar.`);
     }    
@@ -21,8 +22,8 @@ export default {
         return msg.reply(`No tienes suficientes *${currency}* en tu Banco para poder retirar.`);
       }
       const amount = user.bank;
-      global.db.data.chats[chatId].users[senderId].bank = 0;
-      global.db.data.chats[chatId].users[senderId].coins = (user.coins || 0 + amount);
+      db.setChatUser(chatId, senderId, 'bank', 0);
+      db.setChatUser(chatId, senderId, 'coins', (user.coins || 0) + amount);
       return msg.reply(`✎ Has retirado *¥${amount.toLocaleString()} ${currency}* del banco, ahora podras usarlo pero tambien podran robartelo.`);
     }    
     const count = parseInt(args[0]);
@@ -32,8 +33,8 @@ export default {
     if ((user.bank || 0) < count) {
       return msg.reply(`《✧》 No tienes suficientes *${currency}* en tu banco para retirar esa cantidad.\n> Solo tienes *¥${user.bank.toLocaleString()} ${currency}* en tu cuenta.`);
     }    
-    global.db.data.chats[chatId].users[senderId].bank = user.bank - count;
-    global.db.data.chats[chatId].users[senderId].coins = (user.coins || 0 + count);    
+    db.setChatUser(chatId, senderId, 'bank', user.bank - count);
+    db.setChatUser(chatId, senderId, 'coins', (user.coins || 0) + count);    
     await msg.reply(`✎ Has retirado *¥${count.toLocaleString()} ${currency}* del banco, ahora podras usarlo pero tambien podran robartelo.`);
   }
 };

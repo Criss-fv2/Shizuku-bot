@@ -1,17 +1,18 @@
+import db from '#db';
 export default {
   command: ['cf', 'flip', 'coinflip'],
   category: 'economy',
   description: 'Apostar coins en un cara o cruz.',
   run: async ({ msg, sock, args, usedPrefix, command, text }) => {
-    const chat = global.db.data.chats[msg.chat];
+    const chat = db.getChat(msg.chat);
     if (chat.adminonly || !chat.economy) {
       return msg.reply(`ꕥ Los comandos de *Economía* están desactivados en este grupo.\n\nUn *administrador* puede activarlos con el comando:\n» *${usedPrefix}economy on*`);
     }
     const botId = sock.user.id.split(':')[0] + '@s.whatsapp.net';
-    const botSettings = global.db.data.settings[botId];
+    const botSettings = db.getSettings(botId);
     const monedas = botSettings.currency;
-    (global.db.data.chats[msg.chat]?.users?.[msg.sender] && (global.db.data.chats[msg.chat].users[msg.sender].lastcoinflip ??= 0));
-    const user = global.db.data.chats[msg.chat]?.users?.[msg.sender];
+    db.setCreate('chat_users', [msg.chat, msg.sender], 'lastcoinflip', 0);
+    const user = db.getChatUser(msg.chat, msg.sender);
     const cooldown = 10 * 1000;
     if (Date.now() < user.lastcoinflip) {
       const restante = user.lastcoinflip - Date.now();
@@ -38,12 +39,12 @@ export default {
     if (cantidad > user.coins) {
       return msg.reply(`ꕥ No tienes suficientes *${monedas}* fuera del banco para apostar, tienes *¥${user.coins.toLocaleString()} ${monedas}*.`);
     }
-    global.db.data.chats[msg.chat].users[msg.sender].lastcoinflip = Date.now( + cooldown);
+    db.setChatUser(msg.chat, msg.sender, 'lastcoinflip', Date.now() + cooldown);
     const resultado = Math.random() < 0.5 ? 'cara' : 'cruz';
     const acierto = resultado === eleccion;
     const cambio = acierto ? cantidad : -cantidad;
     const newCoins = (user.coins || 0) + cambio;
-    global.db.data.chats[msg.chat].users[msg.sender].coins = newCoins < 0 ? 0 : newCoins;
+    db.setChatUser(msg.chat, msg.sender, 'coins', newCoins < 0 ? 0 : newCoins);
     const mensaje = `「✿」La moneda ha caído en *${capitalize(resultado)}* y has ${acierto ? 'ganado' : 'perdido'} *¥${Math.abs(cambio).toLocaleString()} ${monedas}*!\n> Tu elección fue *${capitalize(eleccion)}*`;
     await sock.sendMessage(msg.chat, { text: mensaje }, { quoted: msg });
   }

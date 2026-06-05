@@ -1,23 +1,24 @@
+import db from '#db';
 export default {
   command: ['economyboard', 'eboard', 'baltop'],
   category: 'economy',
   description: 'Ver el ranking de usuarios con más coins.',
   run: async ({ msg, sock, args, usedPrefix, command, text }) => {
     const chatId = msg.chat;
-    const chatData = global.db.data.chats[chatId];
+    const chatData = db.getChat(chatId);
     if (chatData.adminonly || !chatData.economy) {
       return msg.reply(`ꕥ Los comandos de *Economía* están desactivados en este grupo.\n\nUn *administrador* puede activarlos con el comando:\n» *${usedPrefix}economy on*`);
     }
     const botId = sock.user.id.split(':')[0] + '@s.whatsapp.net';
-    const botSettings = global.db.data.settings[botId];
+    const botSettings = db.getSettings(botId);
     const monedas = botSettings.currency;
     try {
-      const chatUsers = global.db.data.chats[chatId]?.users?.[null, { limit: 1000 }];
+      const chatUsers = db.getChatUser(chatId, null, { limit: 1000 });
       const users = [];
       for (const userData of chatUsers || []) {
         const total = (userData.coins || 0) + (userData.bank || 0);
         if (total >= 1000) {
-          const userInfo = global.db.data.users[userData.user_id];
+          const userInfo = db.getUser(userData.user_id);
           users.push({ ...userData, jid: userData.user_id, name: userInfo?.name || 'Usuario' });
         }
       }      

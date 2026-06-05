@@ -1,20 +1,21 @@
+import db from '#db';
 export default {
   command: ['shop', 'tienda', 'buy', 'comprar', 'inventory', 'inv', 'inventario'],
   category: 'economy',
   description: 'Ver la tienda del bot.',
   run: async ({ msg, sock, args, usedPrefix, command, text }) => {
-    const chat = global.db.data.chats[msg.chat];
+    const chat = db.getChat(msg.chat);
     if (chat.adminonly || !chat.economy) {
       return msg.reply(`ꕥ Los comandos de *Economía* están desactivados en este grupo.\n\nUn *administrador* puede activarlos con el comando:\n» *${usedPrefix}economy on*`);
     }    
     const botId = sock.user.id.split(':')[0] + '@s.whatsapp.net';
-    const settings = global.db.data.settings[botId];
+    const settings = db.getSettings(botId);
     const currency = settings?.currency
-    (global.db.data.chats[msg.chat]?.users?.[msg.sender] && (global.db.data.chats[msg.chat].users[msg.sender].inventory ??= {}));
-    (global.db.data.chats[msg.chat]?.users?.[msg.sender] && (global.db.data.chats[msg.chat].users[msg.sender].weapons ??= {}));
-    (global.db.data.chats[msg.chat]?.users?.[msg.sender] && (global.db.data.chats[msg.chat].users[msg.sender].tools ??= {}));
-    let user = global.db.data.chats[msg.chat]?.users?.[msg.sender];
-    const users = global.db.data.users[msg.sender];
+    db.setCreate('chat_users', [msg.chat, msg.sender], 'inventory', {});
+    db.setCreate('chat_users', [msg.chat, msg.sender], 'weapons', {});
+    db.setCreate('chat_users', [msg.chat, msg.sender], 'tools', {});
+    let user = db.getChatUser(msg.chat, msg.sender);
+    const users = db.getUser(msg.sender);
     if (user.weapons && typeof user.weapons === 'string') {
       try { user.weapons = JSON.parse(user.weapons); } catch { user.weapons = {}; }
     }
@@ -163,10 +164,10 @@ export default {
             }
           }
         }
-        global.db.data.chats[msg.chat].users[msg.sender].weapons = user.weapons;
-        global.db.data.chats[msg.chat].users[msg.sender].tools = user.tools;
-        global.db.data.chats[msg.chat].users[msg.sender].inventory = user.inventory;
-        global.db.data.chats[msg.chat].users[msg.sender].coins = (user.coins || 0 - totalCosto);
+        db.setChatUser(msg.chat, msg.sender, 'weapons', user.weapons);
+        db.setChatUser(msg.chat, msg.sender, 'tools', user.tools);
+        db.setChatUser(msg.chat, msg.sender, 'inventory', user.inventory);
+        db.setChatUser(msg.chat, msg.sender, 'coins', (user.coins || 0) - totalCosto);
         return msg.reply(`ꕥ Has comprado todos los items disponibles (${itemsAComprar.length} items) por *¥${totalCosto.toLocaleString()} ${currency}*.`);
       }
       const itemsInput = args.join(' ').split(',').map(item => item.trim().toLowerCase());
@@ -239,10 +240,10 @@ export default {
           }
         }
       }
-      global.db.data.chats[msg.chat].users[msg.sender].weapons = user.weapons;
-      global.db.data.chats[msg.chat].users[msg.sender].tools = user.tools;
-      global.db.data.chats[msg.chat].users[msg.sender].inventory = user.inventory;
-      global.db.data.chats[msg.chat].users[msg.sender].coins = (user.coins || 0 - costoTotal);      
+      db.setChatUser(msg.chat, msg.sender, 'weapons', user.weapons);
+      db.setChatUser(msg.chat, msg.sender, 'tools', user.tools);
+      db.setChatUser(msg.chat, msg.sender, 'inventory', user.inventory);
+      db.setChatUser(msg.chat, msg.sender, 'coins', (user.coins || 0) - costoTotal);      
       let mensajeFinal = `ꕥ Compra exitosa:\n`;
       mensajeFinal += `> Items: *${itemsComprados.join(', ')}*\n`;
       mensajeFinal += `> Total: *¥${costoTotal.toLocaleString()} ${currency}*`;

@@ -1,3 +1,4 @@
+import db from '#db';
 export default {
   command: ['rt', 'roulette', 'ruleta'],
   category: 'economy',
@@ -5,15 +6,15 @@ export default {
   run: async ({ msg, sock, args, usedPrefix, text }) => {
     const chatId = msg.chat;
     const senderId = msg.sender;
-    const chatData = global.db.data.chats[chatId];
+    const chatData = db.getChat(chatId);
     if (chatData.adminonly || !chatData.economy) {
       return msg.reply(`ꕥ Los comandos de *Economía* están desactivados en este grupo.\n\nUn *administrador* puede activarlos con el comando:\n» *${usedPrefix}economy on*`);
     }
     const botId = sock.user.id.split(':')[0] + '@s.whatsapp.net';
-    const botSettings = global.db.data.settings[botId];
+    const botSettings = db.getSettings(botId);
     const currency = botSettings.currency || 'Monedas';    
-    (global.db.data.chats[chatId]?.users?.[senderId] && (global.db.data.chats[chatId].users[senderId].lastroulette ??= 0));    
-    const user = global.db.data.chats[chatId]?.users?.[senderId];    
+    db.setCreate('chat_users', [chatId, senderId], 'lastroulette', 0);    
+    const user = db.getChatUser(chatId, senderId);    
     const cooldown = 30 * 1000;    
     if (Date.now() < user.lastroulette) {
       const restante = user.lastroulette - Date.now();
@@ -42,7 +43,7 @@ export default {
     if (user.coins < amount) {
       return msg.reply(`《✧》 No tienes suficientes *${currency}* para hacer esta apuesta.`);
     }    
-    global.db.data.chats[chatId].users[senderId].lastroulette = Date.now( + cooldown);    
+    db.setChatUser(chatId, senderId, 'lastroulette', Date.now() + cooldown);    
     const random = Math.floor(Math.random() * 37);
     let resultColor;    
     if (random < 9) {
@@ -54,10 +55,10 @@ export default {
     }    
     if (resultColor === color) {
       const reward = amount * (resultColor === 'green' ? 5 : 2);
-      global.db.data.chats[chatId].users[senderId].coins = (user.coins || 0 + reward);
+      db.setChatUser(chatId, senderId, 'coins', (user.coins || 0) + reward);
       await sock.sendMessage(chatId, { text: `「✿」 La ruleta salió en *${resultColor}* y has ganado *¥${reward.toLocaleString()} ${currency}*.`, mentions: [senderId] }, { quoted: msg });
     } else {
-      global.db.data.chats[chatId].users[senderId].coins = (user.coins || 0 - amount);
+      db.setChatUser(chatId, senderId, 'coins', (user.coins || 0) - amount);
       await sock.sendMessage(chatId, { text: `「✿」 La ruleta salió en *${resultColor}* y has perdido *¥${amount.toLocaleString()} ${currency}*.`, mentions: [senderId] }, { quoted: msg });
     }
   }

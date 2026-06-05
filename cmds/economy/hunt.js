@@ -1,18 +1,19 @@
+import db from '#db';
 export default {
   command: ['cazar', 'hunt'],
   category: 'economy',
   description: 'Cazar animales para ganar coins.',
   run: async ({ msg, sock, usedPrefix, text }) => {
-    const chat = global.db.data.chats[msg.chat];
+    const chat = db.getChat(msg.chat);
     if (chat.adminonly || !chat.economy) {
       return msg.reply(`ꕥ Los comandos de *Economía* están desactivados en este grupo.\n\nUn *administrador* puede activarlos con el comando:\n» *${usedPrefix}economy on*`);
     }
     const botId = sock.user.id.split(':')[0] + '@s.whatsapp.net';
-    const settings = global.db.data.settings[botId];
+    const settings = db.getSettings(botId);
     const currency = settings.currency;
-    (global.db.data.chats[msg.chat]?.users?.[msg.sender] && (global.db.data.chats[msg.chat].users[msg.sender].weapons ??= {}));
-    (global.db.data.chats[msg.chat]?.users?.[msg.sender] && (global.db.data.chats[msg.chat].users[msg.sender].lasthunt ??= 0));    
-    let user = global.db.data.chats[msg.chat]?.users?.[msg.sender];
+    db.setCreate('chat_users', [msg.chat, msg.sender], 'weapons', {});
+    db.setCreate('chat_users', [msg.chat, msg.sender], 'lasthunt', 0);    
+    let user = db.getChatUser(msg.chat, msg.sender);
     if (user.weapons && typeof user.weapons === 'string') {
       try { user.weapons = JSON.parse(user.weapons); } catch { user.weapons = {}; }
     }    
@@ -25,7 +26,7 @@ export default {
     }    
     if (user.weapons.arco.durability <= 10) {
       delete user.weapons.arco;
-      global.db.data.chats[msg.chat].users[msg.sender].weapons = user.weapons;
+      db.setChatUser(msg.chat, msg.sender, 'weapons', user.weapons);
       return msg.reply(`ꕥ Tu Arco se ha roto por el uso y ha sido eliminado de tu inventario.\n>Compra uno nuevo con: *${usedPrefix}buy arco*`);
     }    
     if (Date.now() < user.lasthunt) {
@@ -33,7 +34,7 @@ export default {
       return msg.reply(`ꕥ Debes esperar *${msToTime(restante)}* antes de volver a cazar.`);
     }    
     user.stamina -= staminaConsumed;
-    global.db.data.chats[msg.chat].users[msg.sender].stamina = user.stamina;    
+    db.setChatUser(msg.chat, msg.sender, 'stamina', user.stamina);    
     const rand = Math.random();
     const durabilityConsumed = Math.floor(Math.random() * (15 - 1 + 1)) + 1;
     let cantidad = 0;
@@ -43,10 +44,10 @@ export default {
       if (user.weapons.arco.durability <= 10) {
         delete user.weapons.arco;
       }
-      global.db.data.chats[msg.chat].users[msg.sender].weapons = user.weapons;      
+      db.setChatUser(msg.chat, msg.sender, 'weapons', user.weapons);      
       cantidad = Math.floor(Math.random() * (13000 - 10000 + 1)) + 10000;
       user.coins += cantidad;
-      global.db.data.chats[msg.chat].users[msg.sender].coins = user.coins;      
+      db.setChatUser(msg.chat, msg.sender, 'coins', user.coins);      
       const successMessages = [
         `¡Con gran valentía, lograste cazar un Oso con tu Arco! Ganaste *¥${cantidad.toLocaleString()} ${currency}*.`,
         `¡Has cazado un Tigre feroz con tu Arco! Tras una persecución electrizante, ganaste *¥${cantidad.toLocaleString()} ${currency}*.`,
@@ -65,26 +66,26 @@ export default {
       if (user.weapons.arco.durability <= 10) {
         delete user.weapons.arco;
       }
-      global.db.data.chats[msg.chat].users[msg.sender].weapons = user.weapons;      
+      db.setChatUser(msg.chat, msg.sender, 'weapons', user.weapons);      
       cantidad = Math.floor(Math.random() * (8000 - 6000 + 1)) + 6000;
       const total = (user.coins || 0) + (user.bank || 0);
       if (total >= cantidad) {
         if (user.coins >= cantidad) {
           user.coins -= cantidad;
-          global.db.data.chats[msg.chat].users[msg.sender].coins = user.coins;
+          db.setChatUser(msg.chat, msg.sender, 'coins', user.coins);
         } else {
           const restante = cantidad - user.coins;
           user.coins = 0;
           user.bank -= restante;
-          global.db.data.chats[msg.chat].users[msg.sender].coins = 0;
-          global.db.data.chats[msg.chat].users[msg.sender].bank = user.bank;
+          db.setChatUser(msg.chat, msg.sender, 'coins', 0);
+          db.setChatUser(msg.chat, msg.sender, 'bank', user.bank);
         }
       } else {
         cantidad = total;
         user.coins = 0;
         user.bank = 0;
-        global.db.data.chats[msg.chat].users[msg.sender].coins = 0;
-        global.db.data.chats[msg.chat].users[msg.sender].bank = 0;
+        db.setChatUser(msg.chat, msg.sender, 'coins', 0);
+        db.setChatUser(msg.chat, msg.sender, 'bank', 0);
       }      
       const failMessages = [
         `Tu presa se escapó y no lograste cazar nada con tu Arco, perdiste *¥${cantidad.toLocaleString()} ${currency}*.`,
@@ -106,7 +107,7 @@ export default {
       ];
       message = pickRandom(neutralMessages);
     }
-    global.db.data.chats[msg.chat].users[msg.sender].lasthunt = Date.now( + 15 * 60 * 1000);
+    db.setChatUser(msg.chat, msg.sender, 'lasthunt', Date.now() + 15 * 60 * 1000);
     await sock.sendMessage(msg.chat, { text: `「✿」 ${message}` }, { quoted: msg });
   }
 };

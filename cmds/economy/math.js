@@ -1,3 +1,4 @@
+import db from '#db';
 global.math = global.math || {};
 
 const limits = { facil: 10, medio: 50, dificil: 90, imposible: 100, imposible2: 160 };
@@ -27,14 +28,14 @@ export default {
     const respuestaUsuario = parseFloat(msg.text?.trim());
     if (isNaN(respuestaUsuario)) return;
     const botId = sock.user.id.split(':')[0] + '@s.whatsapp.net';
-    const chat = global.db.data.chats[chatId];
+    const chat = db.getChat(chatId);
     if (chat.primaryBot && chat.primaryBot !== botId) return;
-    const user = global.db.data.chats[chatId]?.users?.[msg.sender];
+    const user = db.getChatUser(chatId, msg.sender);
     const respuestaCorrecta = parseFloat(juego.respuesta);
     if (respuestaUsuario === respuestaCorrecta) {
       const [min, max] = rewardRanges[juego.dificultad] || [500, 1000];
       const coinsAleatorio = Math.floor(Math.random() * (max - min + 1)) + min;
-      global.db.data.chats[chatId].users[msg.sender].coins = (user.coins || 0 + coinsAleatorio);
+      db.setChatUser(chatId, msg.sender, 'coins', (user.coins || 0) + coinsAleatorio);
       clearTimeout(juego.tiempoLimite);
       delete global.math[chatId];
       await sock.reply(chatId, `「❀」Respuesta correcta.\n> *Ganaste ›* ¥${coinsAleatorio.toLocaleString()}`, msg);
@@ -52,7 +53,7 @@ export default {
   },
   run: async ({ msg, sock, args, usedPrefix, command }) => {
     const chatId = msg.chat;
-    const chat = global.db.data.chats[chatId];
+    const chat = db.getChat(chatId);
     if (chat.adminonly || !chat.economy) {
       return msg.reply(`ꕥ Los comandos de *Economía* están desactivados en este grupo.\n\nUn *administrador* puede activarlos con el comando:\n» *${usedPrefix}economy on*`);
     }

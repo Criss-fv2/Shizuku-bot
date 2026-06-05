@@ -1,19 +1,20 @@
 import { delay } from 'baileys';
+import db from '#db';
 
 export default {
   command: ['slot'],
   category: 'economy',
   description: 'Apostar coins en el casino.',
   run: async ({ msg, sock, args, usedPrefix, command, text }) => {
-    const chat = global.db.data.chats[msg.chat];
+    const chat = db.getChat(msg.chat);
     if (chat.adminonly || !chat.economy) {
       return msg.reply(`ꕥ Los comandos de *Economía* están desactivados en este grupo.\n\nUn *administrador* puede activarlos con el comando:\n» *${usedPrefix}economy on*`);
     }
     const botId = sock.user.id.split(':')[0] + '@s.whatsapp.net';
-    const bot = global.db.data.settings[botId];
+    const bot = db.getSettings(botId);
     const currency = bot.currency;    
-    (global.db.data.chats[msg.chat]?.users?.[msg.sender] && (global.db.data.chats[msg.chat].users[msg.sender].lastslot ??= 0));
-    const user = global.db.data.chats[msg.chat]?.users?.[msg.sender];    
+    db.setCreate('chat_users', [msg.chat, msg.sender], 'lastslot', 0);
+    const user = db.getChatUser(msg.chat, msg.sender);    
     if (!args[0] || isNaN(args[0]) || parseInt(args[0]) <= 0) {
       return msg.reply(`❀ Por favor, ingresa la cantidad que deseas apostar.`);
     }    
@@ -64,8 +65,8 @@ ${x[2]} : ${y[2]} : ${z[2]}
       resultado = `❀ Perdiste *¥${apuesta.toLocaleString()} ${currency}*.`;
       newCoins -= apuesta;
     }
-    global.db.data.chats[msg.chat].users[msg.sender].lastslot = Date.now();
-    global.db.data.chats[msg.chat].users[msg.sender].coins = newCoins;
+    db.setChatUser(msg.chat, msg.sender, 'lastslot', Date.now());
+    db.setChatUser(msg.chat, msg.sender, 'coins', newCoins);
     const finalText = `「✿」| *SLOTS* 
 ────────
 ${x[0]} : ${y[0]} : ${z[0]}

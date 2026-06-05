@@ -1,18 +1,19 @@
+import db from '#db';
 export default {
   command: ['dungeon', 'mazmorra'],
   category: 'economy',
   description: 'Explorar mazmorras para ganar coins.',
   run: async ({ msg, sock, usedPrefix, text }) => {
-    const chat = global.db.data.chats[msg.chat];
+    const chat = db.getChat(msg.chat);
     if (chat.adminonly || !chat.economy) {
       return msg.reply(`ꕥ Los comandos de *Economía* están desactivados en este grupo.\n\nUn *administrador* puede activarlos con el comando:\n» *${usedPrefix}economy on*`);
     }    
     const botId = sock.user.id.split(':')[0] + '@s.whatsapp.net';
-    const settings = global.db.data.settings[botId];
+    const settings = db.getSettings(botId);
     const currency = settings.currency;
-    (global.db.data.chats[msg.chat]?.users?.[msg.sender] && (global.db.data.chats[msg.chat].users[msg.sender].weapons ??= {}));
-    (global.db.data.chats[msg.chat]?.users?.[msg.sender] && (global.db.data.chats[msg.chat].users[msg.sender].lastdungeon ??= 0));    
-    let user = global.db.data.chats[msg.chat]?.users?.[msg.sender];
+    db.setCreate('chat_users', [msg.chat, msg.sender], 'weapons', {});
+    db.setCreate('chat_users', [msg.chat, msg.sender], 'lastdungeon', 0);    
+    let user = db.getChatUser(msg.chat, msg.sender);
     if (user.weapons && typeof user.weapons === 'string') {
       try { user.weapons = JSON.parse(user.weapons); } catch { user.weapons = {}; }
     }    
@@ -25,7 +26,7 @@ export default {
     if (user.weapons?.hacha) {
       if (user.weapons.hacha.durability <= 10) {
         delete user.weapons.hacha;
-        global.db.data.chats[msg.chat].users[msg.sender].weapons = user.weapons;
+        db.setChatUser(msg.chat, msg.sender, 'weapons', user.weapons);
         return msg.reply(`ꕥ Tu Hacha se ha roto por el uso y ha sido eliminada de tu inventario.\n> Compra una nueva con: *${usedPrefix}buy hacha*`);
       }
       usingWeapon = true;
@@ -36,7 +37,7 @@ export default {
       }
       usingMagic = true;
       user.magic -= magicConsumed;
-      global.db.data.chats[msg.chat].users[msg.sender].magic = user.magic;
+      db.setChatUser(msg.chat, msg.sender, 'magic', user.magic);
     }    
     if (user.health < 5) {
       return msg.reply(`ꕥ No tienes suficiente salud para volver a la *mazmorra*.\n> Usa *${usedPrefix}heal* para curarte.`);
@@ -46,7 +47,7 @@ export default {
       return msg.reply(`ꕥ Debes esperar *${msToTime(restante)}* antes de volver a la mazmorra.`);
     }    
     user.stamina -= staminaConsumed;
-    global.db.data.chats[msg.chat].users[msg.sender].stamina = user.stamina;    
+    db.setChatUser(msg.chat, msg.sender, 'stamina', user.stamina);    
     const rand = Math.random();
     let cantidad = 0;
     let salud = Math.floor(Math.random() * (15 - 1 + 1)) + 1;
@@ -58,13 +59,13 @@ export default {
         if (user.weapons.hacha.durability <= 10) {
           delete user.weapons.hacha;
         }
-        global.db.data.chats[msg.chat].users[msg.sender].weapons = user.weapons;
+        db.setChatUser(msg.chat, msg.sender, 'weapons', user.weapons);
       }
       cantidad = Math.floor(Math.random() * (15000 - 12000 + 1)) + 12000;
       user.coins += cantidad;
       user.health -= salud;
-      global.db.data.chats[msg.chat].users[msg.sender].coins = user.coins;
-      global.db.data.chats[msg.chat].users[msg.sender].health = user.health;      
+      db.setChatUser(msg.chat, msg.sender, 'coins', user.coins);
+      db.setChatUser(msg.chat, msg.sender, 'health', user.health);      
       const successMessages = [
         `Derrotaste al guardián de las ruinas y reclamaste el tesoro antiguo, ganaste *¥${cantidad.toLocaleString()} ${currency}*.`,
         `Descifraste los símbolos rúnicos y obtuviste recompensas ocultas, ganaste *¥${cantidad.toLocaleString()} ${currency}*.`,
@@ -84,31 +85,31 @@ export default {
         if (user.weapons.hacha.durability <= 10) {
           delete user.weapons.hacha;
         }
-        global.db.data.chats[msg.chat].users[msg.sender].weapons = user.weapons;
+        db.setChatUser(msg.chat, msg.sender, 'weapons', user.weapons);
       }
       cantidad = Math.floor(Math.random() * (9000 - 7500 + 1)) + 7500;
       const total = (user.coins || 0) + (user.bank || 0);
       if (total >= cantidad) {
         if (user.coins >= cantidad) {
           user.coins -= cantidad;
-          global.db.data.chats[msg.chat].users[msg.sender].coins = user.coins;
+          db.setChatUser(msg.chat, msg.sender, 'coins', user.coins);
         } else {
           const restante = cantidad - user.coins;
           user.coins = 0;
           user.bank -= restante;
-          global.db.data.chats[msg.chat].users[msg.sender].coins = 0;
-          global.db.data.chats[msg.chat].users[msg.sender].bank = user.bank;
+          db.setChatUser(msg.chat, msg.sender, 'coins', 0);
+          db.setChatUser(msg.chat, msg.sender, 'bank', user.bank);
         }
       } else {
         cantidad = total;
         user.coins = 0;
         user.bank = 0;
-        global.db.data.chats[msg.chat].users[msg.sender].coins = 0;
-        global.db.data.chats[msg.chat].users[msg.sender].bank = 0;
+        db.setChatUser(msg.chat, msg.sender, 'coins', 0);
+        db.setChatUser(msg.chat, msg.sender, 'bank', 0);
       }
       user.health -= salud;
       if (user.health < 0) user.health = 0;
-      global.db.data.chats[msg.chat].users[msg.sender].health = user.health;      
+      db.setChatUser(msg.chat, msg.sender, 'health', user.health);      
       const failMessages = [
         `Un espectro maldito te drena energía antes de que puedas escapar, perdiste *¥${cantidad.toLocaleString()} ${currency}*.`,
         `Un basilisco te sorprende en la cámara oculta, huyes herido, perdiste *¥${cantidad.toLocaleString()} ${currency}*.`,
@@ -129,7 +130,7 @@ export default {
       ];
       message = pickRandom(neutralMessages);
     }    
-    global.db.data.chats[msg.chat].users[msg.sender].lastdungeon = Date.now( + 17 * 60 * 1000);
+    db.setChatUser(msg.chat, msg.sender, 'lastdungeon', Date.now() + 17 * 60 * 1000);
     await sock.sendMessage(msg.chat, { text: `「✿」 ${message}` }, { quoted: msg });
   }
 };

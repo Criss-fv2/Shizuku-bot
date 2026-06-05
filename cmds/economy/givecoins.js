@@ -1,3 +1,4 @@
+import db from '#db';
 export default {
   command: ['givecoins', 'pay', 'coinsgive'],
   category: 'economy',
@@ -5,9 +6,9 @@ export default {
   run: async ({ msg, sock, args, usedPrefix, command, text }) => {
     const chatId = msg.chat;
     const botId = sock.user.id.split(':')[0] + '@s.whatsapp.net';
-    const botSettings = global.db.data.settings[botId];
+    const botSettings = db.getSettings(botId);
     const monedas = botSettings.currency || 'coins';
-    const chatData = global.db.data.chats[chatId];
+    const chatData = db.getChat(chatId);
     if (chatData.adminonly || !chatData.economy) {
       return msg.reply(`ꕥ Los comandos de *Economía* están desactivados en este grupo.\n\nUn *administrador* puede activarlos con el comando:\n» *${usedPrefix}economy on*`);
     }
@@ -15,8 +16,8 @@ export default {
     if (!who) {
       return msg.reply(`❀ Debes mencionar a quien quieras transferir *${monedas}*.\n> Ejemplo » *${usedPrefix + command} 25000 @mencion*`);
     }
-    const senderData = global.db.data.chats[chatId]?.users?.[msg.sender];
-    const targetData = global.db.data.chats[chatId]?.users?.[who];   
+    const senderData = db.getChatUser(chatId, msg.sender);
+    const targetData = db.getChatUser(chatId, who);   
     if (!targetData) {
       return msg.reply(`ꕥ El usuario mencionado no está registrado en el bot.`);
     }
@@ -28,9 +29,9 @@ export default {
     if (senderData.bank < cantidad) {
       return msg.reply(`ꕥ No tienes suficientes *${monedas}* en el banco para transferir.\n> Tu saldo actual: *¥${senderData.bank.toLocaleString()} ${monedas}*`);
     }        
-    global.db.data.chats[chatId].users[msg.sender].bank = senderData.bank - cantidad;
-    global.db.data.chats[chatId].users[who].bank = (targetData.bank || 0 + cantidad);
-    const userData = global.db.data.users[who];
+    db.setChatUser(chatId, msg.sender, 'bank', senderData.bank - cantidad);
+    db.setChatUser(chatId, who, 'bank', (targetData.bank || 0) + cantidad);
+    const userData = db.getUser(who);
     let name = userData?.name || who.split('@')[0];
     await sock.sendMessage(chatId, { text: `❀ Transferiste *¥${cantidad.toLocaleString()} ${monedas}* a *${name}*\n> Ahora tienes *¥${(senderData.bank - cantidad).toLocaleString()} ${monedas}* en tu banco.`, mentions: [who] }, { quoted: msg });
   }

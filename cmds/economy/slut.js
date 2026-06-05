@@ -1,3 +1,4 @@
+import db from '#db';
 export default {
   command: ['slut', 'prostituirse'],
   category: 'economy',
@@ -5,14 +6,14 @@ export default {
   run: async ({ msg, sock, usedPrefix, text }) => {
     const chatId = msg.chat;
     const senderId = msg.sender;    
-    const chatData = global.db.data.chats[chatId];
+    const chatData = db.getChat(chatId);
     if (chatData.adminonly || !chatData.economy) {
       return msg.reply(`ꕥ Los comandos de *Economía* están desactivados en este grupo.\n\nUn *administrador* puede activarlos con el comando:\n» *${usedPrefix}economy on*`);
     }
     const botId = sock.user.id.split(':')[0] + '@s.whatsapp.net';    
-    const botSettings = global.db.data.settings[botId];
-    (global.db.data.chats[chatId]?.users?.[senderId] && (global.db.data.chats[chatId].users[senderId].lastslut ??= 0));    
-    const user = global.db.data.chats[chatId]?.users?.[senderId];    
+    const botSettings = db.getSettings(botId);
+    db.setCreate('chat_users', [chatId, senderId], 'lastslut', 0);    
+    const user = db.getChatUser(chatId, senderId);    
     const cooldown = 5 * 60 * 1000;
     const now = Date.now();
     const remaining = (user.lastslut || 0) - now;
@@ -24,7 +25,7 @@ export default {
     const amount = success ? 
       Math.floor(Math.random() * (6000 - 3500 + 1)) + 3500 : 
       Math.floor(Math.random() * (4000 - 2000 + 1)) + 2000;    
-    global.db.data.chats[chatId].users[senderId].lastslut = now + cooldown;    
+    db.setChatUser(chatId, senderId, 'lastslut', now + cooldown);    
     const winMessages = [
       `Le acaricias el pene a un cliente habitual y ganaste *¥${amount.toLocaleString()} ${currency}*!`,
       `El admin se viene en tu boca, ganaste *¥${amount.toLocaleString()} ${currency}*!`,
@@ -63,20 +64,20 @@ export default {
     ];
     const message = success ? winMessages[Math.floor(Math.random() * winMessages.length)] : loseMessages[Math.floor(Math.random() * loseMessages.length)];
     if (success) {
-      global.db.data.chats[chatId].users[senderId].coins = (user.coins || 0 + amount);
+      db.setChatUser(chatId, senderId, 'coins', (user.coins || 0) + amount);
     } else {
       const total = (user.coins || 0) + (user.bank || 0);
       if (total >= amount) {
         if (user.coins >= amount) {
-          global.db.data.chats[chatId].users[senderId].coins = (user.coins || 0 - amount);
+          db.setChatUser(chatId, senderId, 'coins', (user.coins || 0) - amount);
         } else {
           const remainingLoss = amount - (user.coins || 0);
-          global.db.data.chats[chatId].users[senderId].coins = 0;
-          global.db.data.chats[chatId].users[senderId].bank = (user.bank || 0 - remainingLoss);
+          db.setChatUser(chatId, senderId, 'coins', 0);
+          db.setChatUser(chatId, senderId, 'bank', (user.bank || 0) - remainingLoss);
         }
       } else {
-        global.db.data.chats[chatId].users[senderId].coins = 0;
-        global.db.data.chats[chatId].users[senderId].bank = 0;
+        db.setChatUser(chatId, senderId, 'coins', 0);
+        db.setChatUser(chatId, senderId, 'bank', 0);
       }
     }   
     await sock.sendMessage(chatId, { text: `「✿」 ${message}`, mentions: [senderId] }, { quoted: msg });

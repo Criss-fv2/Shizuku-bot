@@ -1,28 +1,29 @@
+import db from '#db';
 export default {
   command: ['heal', 'curar', 'pocion', 'potion'],
   category: 'economy',
   description: 'Curar salud para salir de aventuras.',
   run: async ({ msg, sock, usedPrefix, command }) => {
-    const chatData = global.db.data.chats[msg.chat];
+    const chatData = db.getChat(msg.chat);
     if (chatData.adminonly || !chatData.economy) {
       return msg.reply(`ꕥ Los comandos de *Economía* están desactivados en este grupo.\n\nUn *administrador* puede activarlos con el comando:\n» *${usedPrefix}economy on*`);
     }    
     const botId = sock.user.id.split(':')[0] + '@s.whatsapp.net';
-    const bot = global.db.data.settings[botId];
+    const bot = db.getSettings(botId);
     const currency = bot.currency;    
     const who = msg.mentionedJid?.[0] || msg.quoted?.sender || null;
-    let healer = global.db.data.chats[msg.chat]?.users?.[msg.sender];
+    let healer = db.getChatUser(msg.chat, msg.sender);
     let target = healer;
     if (healer.inventory && typeof healer.inventory === 'string') {
       try { healer.inventory = JSON.parse(healer.inventory); } catch { healer.inventory = {}; }
     }    
     if (who) {
-      target = global.db.data.chats[msg.chat]?.users?.[who];
+      target = db.getChatUser(msg.chat, who);
       if (!target) {
         return msg.reply(`「✎」 El usuario mencionado no está registrado en el bot.`);
       }
     }    
-    const targetUser = who ? global.db.data.users[who] : null;
+    const targetUser = who ? db.getUser(who) : null;
     const cmd = command.toLowerCase();
     if (cmd === 'pocion' || cmd === 'potion') {
       if (!healer.inventory?.pocion || healer.inventory.pocion <= 0) {
@@ -38,13 +39,13 @@ export default {
       if (healer.inventory.pocion <= 0) {
         delete healer.inventory.pocion;
       }
-      global.db.data.chats[msg.chat].users[msg.sender].inventory = healer.inventory;      
+      db.setChatUser(msg.chat, msg.sender, 'inventory', healer.inventory);      
       const magiaRestaurada = Math.min(magiaFaltante, 100);
       target.magic = magiaActual + magiaRestaurada;
       if (who) {
-        global.db.data.chats[msg.chat].users[who].magic = target.magic;
+        db.setChatUser(msg.chat, who, 'magic', target.magic);
       } else {
-        global.db.data.chats[msg.chat].users[msg.sender].magic = target.magic;
+        db.setChatUser(msg.chat, msg.sender, 'magic', target.magic);
       }      
       const info = who ? `ꕥ Has usado una poción en *${targetUser?.name || who.split('@')[0]}* y restauraste *${magiaRestaurada}* puntos de magia.\n> Magia actual: ${target.magic}/100` : `ꕥ Has usado una poción y restauraste *${magiaRestaurada}* puntos de magia.\n> Magia actual: ${target.magic}/100`;
       return msg.reply(info);
@@ -73,30 +74,30 @@ export default {
     }    
     if ((healer.coins || 0) >= costoTotal) {
       healer.coins -= costoTotal;
-      global.db.data.chats[msg.chat].users[msg.sender].coins = healer.coins;
+      db.setChatUser(msg.chat, msg.sender, 'coins', healer.coins);
     } else {
       const restante = costoTotal - (healer.coins || 0);
       healer.coins = 0;
       healer.bank = Math.max(0, (healer.bank || 0) - restante);
-      global.db.data.chats[msg.chat].users[msg.sender].coins = 0;
-      global.db.data.chats[msg.chat].users[msg.sender].bank = healer.bank;
+      db.setChatUser(msg.chat, msg.sender, 'coins', 0);
+      db.setChatUser(msg.chat, msg.sender, 'bank', healer.bank);
     }    
     const curaciones = [];
     if (faltanteSalud > 0) {
       target.health = 100;
       if (who) {
-        global.db.data.chats[msg.chat].users[who].health = 100;
+        db.setChatUser(msg.chat, who, 'health', 100);
       } else {
-        global.db.data.chats[msg.chat].users[msg.sender].health = 100;
+        db.setChatUser(msg.chat, msg.sender, 'health', 100);
       }
       curaciones.push(`salud`);
     }
     if (faltanteStamina > 0) {
       target.stamina = 100;
       if (who) {
-        global.db.data.chats[msg.chat].users[who].stamina = 100;
+        db.setChatUser(msg.chat, who, 'stamina', 100);
       } else {
-        global.db.data.chats[msg.chat].users[msg.sender].stamina = 100;
+        db.setChatUser(msg.chat, msg.sender, 'stamina', 100);
       }
       curaciones.push(`stamina`);
     }    

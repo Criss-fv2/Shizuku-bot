@@ -1,20 +1,21 @@
+import db from '#db';
 export default {
   command: ['weekly', 'semanal'],
   category: 'economy',
   description: 'Reclamar tu recompensa semanal.',
   run: async ({ msg, sock, usedPrefix }) => {
-    const chat = global.db.data.chats[msg.chat];
+    const chat = db.getChat(msg.chat);
     if (chat.adminonly || !chat.economy) {
       return msg.reply(`ꕥ Los comandos de *Economía* están desactivados en este grupo.\n\nUn *administrador* puede activarlos con el comando:\n» *${usedPrefix}economy on*`);
     }        
     const botId = sock.user.id.split(':')[0] + '@s.whatsapp.net';
-    const bot = global.db.data.settings[botId];
+    const bot = db.getSettings(botId);
     const currency = bot.currency;
-    (global.db.data.users[msg.sender].weeklyStreak ??= 0);
-    (global.db.data.users[msg.sender].lastWeeklyGlobal ??= 0);
-    (global.db.data.chats[msg.chat]?.users?.[msg.sender] && (global.db.data.chats[msg.chat].users[msg.sender].lastweekly ??= 0));
-    const users = global.db.data.users[msg.sender];
-    const user = global.db.data.chats[msg.chat]?.users?.[msg.sender];
+    db.setCreate('users', msg.sender, 'weeklyStreak', 0);
+    db.setCreate('users', msg.sender, 'lastWeeklyGlobal', 0);
+    db.setCreate('chat_users', [msg.chat, msg.sender], 'lastweekly', 0);
+    const users = db.getUser(msg.sender);
+    const user = db.getChatUser(msg.chat, msg.sender);
     const gap = 7 * 24 * 60 * 60 * 1000;
     const now = Date.now();
     if (now < user.lastweekly) {
@@ -25,17 +26,17 @@ export default {
     const lost = users.weeklyStreak >= 1 && now - users.lastWeeklyGlobal > gap * 1.5;
     if (lost) {
       currentStreak = 0;
-      global.db.data.users[msg.sender].weeklyStreak = 0;
+      db.setUser(msg.sender, 'weeklyStreak', 0);
     }
     const canClaimWeeklyGlobal = now - users.lastWeeklyGlobal >= gap;
     if (canClaimWeeklyGlobal) {
       currentStreak = Math.min(currentStreak + 1, 30);
-      global.db.data.users[msg.sender].weeklyStreak = currentStreak;
-      global.db.data.users[msg.sender].lastWeeklyGlobal = now;
+      db.setUser(msg.sender, 'weeklyStreak', currentStreak);
+      db.setUser(msg.sender, 'lastWeeklyGlobal', now);
     }
     const coins = Math.min(40000 + (currentStreak - 1) * 5000, 185000);
-    global.db.data.chats[msg.chat].users[msg.sender].coins = (user.coins || 0 + coins);
-    global.db.data.chats[msg.chat].users[msg.sender].lastweekly = now + gap;
+    db.setChatUser(msg.chat, msg.sender, 'coins', (user.coins || 0) + coins);
+    db.setChatUser(msg.chat, msg.sender, 'lastweekly', now + gap);
     let nextReward = Math.min(40000 + currentStreak * 5000, 185000).toLocaleString();
     let caption = `> Semana *${currentStreak + 1}* » *+¥${nextReward}*`;
     if (lost) caption += `\n> ☆ ¡Has perdido tu racha de semanas!`;

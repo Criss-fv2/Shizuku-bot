@@ -1,18 +1,19 @@
+import db from '#db';
 export default {
   command: ['mine', 'minar'],
   category: 'economy',
   description: 'Realizar trabajos de minería y ganar coins.',
   run: async ({ msg, sock, usedPrefix }) => {
-    const chat = global.db.data.chats[msg.chat];
+    const chat = db.getChat(msg.chat);
     if (chat.adminonly || !chat.economy) {
       return msg.reply(`ꕥ Los comandos de *Economía* están desactivados en este grupo.\n\nUn *administrador* puede activarlos con el comando:\n» *${usedPrefix}economy on*`);
     }
     const botId = sock?.user?.id.split(':')[0] + '@s.whatsapp.net';
-    const botSettings = global.db.data.settings[botId];
+    const botSettings = db.getSettings(botId);
     const monedas = botSettings?.currency || 'Coins';
-    (global.db.data.chats[msg.chat]?.users?.[msg.sender] && (global.db.data.chats[msg.chat].users[msg.sender].tools ??= {}));
-    (global.db.data.chats[msg.chat]?.users?.[msg.sender] && (global.db.data.chats[msg.chat].users[msg.sender].lastmine ??= 0));    
-    let user = global.db.data.chats[msg.chat]?.users?.[msg.sender];
+    db.setCreate('chat_users', [msg.chat, msg.sender], 'tools', {});
+    db.setCreate('chat_users', [msg.chat, msg.sender], 'lastmine', 0);    
+    let user = db.getChatUser(msg.chat, msg.sender);
     if (user.tools && typeof user.tools === 'string') {
       try { user.tools = JSON.parse(user.tools); } catch { user.tools = {}; }
     }    
@@ -25,7 +26,7 @@ export default {
     }    
     if (user.tools.pico.durability <= 10) {
       delete user.tools.pico;
-      global.db.data.chats[msg.chat].users[msg.sender].tools = user.tools;
+      db.setChatUser(msg.chat, msg.sender, 'tools', user.tools);
       return msg.reply(`ꕥ Tu Pico se ha roto por el uso y ha sido eliminado de tu inventario.\n> Compra uno nuevo con: *${usedPrefix}buy pico*`);
     }    
     const remaining = user.lastmine - Date.now();
@@ -33,15 +34,15 @@ export default {
       return msg.reply(`ꕥ Debes esperar *${msToTime(remaining)}* para minar de nuevo.`);
     }    
     user.stamina -= staminaConsumed;
-    global.db.data.chats[msg.chat].users[msg.sender].stamina = user.stamina;    
+    db.setChatUser(msg.chat, msg.sender, 'stamina', user.stamina);    
     const durabilityConsumed = Math.floor(Math.random() * (15 - 1 + 1)) + 1;
     user.tools.pico.durability -= durabilityConsumed;    
     if (user.tools.pico.durability <= 10) {
       delete user.tools.pico;
     }
-    global.db.data.chats[msg.chat].users[msg.sender].tools = user.tools;    
+    db.setChatUser(msg.chat, msg.sender, 'tools', user.tools);    
     user.lastmine = Date.now() + 10 * 60 * 1000;
-    global.db.data.chats[msg.chat].users[msg.sender].lastmine = user.lastmine;    
+    db.setChatUser(msg.chat, msg.sender, 'lastmine', user.lastmine);    
     let isLegendary = Math.random() < 0.02;
     let reward, narration, bonusMsg = '';    
     if (isLegendary) {
@@ -59,7 +60,7 @@ export default {
       }
     }    
     user.coins += reward;
-    global.db.data.chats[msg.chat].users[msg.sender].coins = user.coins;    
+    db.setChatUser(msg.chat, msg.sender, 'coins', user.coins);    
     let caption = `「✿」 ${narration} *${reward.toLocaleString()} ${monedas}*`;
     if (bonusMsg) caption += `\n${bonusMsg}`;
     await sock.reply(msg.chat, caption, msg);

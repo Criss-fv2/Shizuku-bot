@@ -1,18 +1,19 @@
+import db from '#db';
 export default {
   command: ['pescar', 'fish'],
   category: 'economy',
   description: 'Ganar coins pescando.',
   run: async ({ msg, sock, usedPrefix, text }) => {
-    const chat = global.db.data.chats[msg.chat];
+    const chat = db.getChat(msg.chat);
     if (chat.adminonly || !chat.economy) {
       return msg.reply(`ꕥ Los comandos de *Economía* están desactivados en este grupo.\n\nUn *administrador* puede activarlos con el comando:\n» *${usedPrefix}economy on*`);
     }    
     const botId = sock.user.id.split(':')[0] + '@s.whatsapp.net';
-    const settings = global.db.data.settings[botId];
+    const settings = db.getSettings(botId);
     const currency = settings.currency;
-    (global.db.data.chats[msg.chat]?.users?.[msg.sender] && (global.db.data.chats[msg.chat].users[msg.sender].tools ??= {}));
-    (global.db.data.chats[msg.chat]?.users?.[msg.sender] && (global.db.data.chats[msg.chat].users[msg.sender].lastfish ??= 0));    
-    let user = global.db.data.chats[msg.chat]?.users?.[msg.sender];
+    db.setCreate('chat_users', [msg.chat, msg.sender], 'tools', {});
+    db.setCreate('chat_users', [msg.chat, msg.sender], 'lastfish', 0);    
+    let user = db.getChatUser(msg.chat, msg.sender);
     if (user.tools && typeof user.tools === 'string') {
       try { user.tools = JSON.parse(user.tools); } catch { user.tools = {}; }
     }    
@@ -25,7 +26,7 @@ export default {
     }    
     if (user.tools.caña.durability <= 10) {
       delete user.tools.caña;
-      global.db.data.chats[msg.chat].users[msg.sender].tools = user.tools;
+      db.setChatUser(msg.chat, msg.sender, 'tools', user.tools);
       return msg.reply(`ꕥ Tu Caña de pescar se ha roto por el uso y ha sido eliminada de tu inventario.\n> Compra una nueva con: *${usedPrefix}buy caña*`);
     }    
     const remainingTime = user.lastfish - Date.now();
@@ -33,7 +34,7 @@ export default {
       return msg.reply(`ꕥ Debes esperar *${msToTime(remainingTime)}* antes de volver a pescar.`);
     }    
     user.stamina -= staminaConsumed;
-    global.db.data.chats[msg.chat].users[msg.sender].stamina = user.stamina;    
+    db.setChatUser(msg.chat, msg.sender, 'stamina', user.stamina);    
     const rand = Math.random();
     const durabilityConsumed = Math.floor(Math.random() * (15 - 1 + 1)) + 1;
     let cantidad;
@@ -43,10 +44,10 @@ export default {
       if (user.tools.caña.durability <= 10) {
         delete user.tools.caña;
       }
-      global.db.data.chats[msg.chat].users[msg.sender].tools = user.tools;      
+      db.setChatUser(msg.chat, msg.sender, 'tools', user.tools);      
       cantidad = Math.floor(Math.random() * (8000 - 6000 + 1)) + 6000;
       user.coins += cantidad;
-      global.db.data.chats[msg.chat].users[msg.sender].coins = user.coins;      
+      db.setChatUser(msg.chat, msg.sender, 'coins', user.coins);      
       const successMessages = [
         `¡Has pescado un Salmón con tu Caña! Ganaste *¥${cantidad.toLocaleString()} ${currency}*!`,
         `¡Has pescado una Trucha con tu Caña! Ganaste *¥${cantidad.toLocaleString()} ${currency}*!`,
@@ -65,26 +66,26 @@ export default {
       if (user.tools.caña.durability <= 10) {
         delete user.tools.caña;
       }
-      global.db.data.chats[msg.chat].users[msg.sender].tools = user.tools;      
+      db.setChatUser(msg.chat, msg.sender, 'tools', user.tools);      
       cantidad = Math.floor(Math.random() * (6500 - 5000 + 1)) + 5000;
       const total = (user.coins || 0) + (user.bank || 0);
       if (total >= cantidad) {
         if (user.coins >= cantidad) {
           user.coins -= cantidad;
-          global.db.data.chats[msg.chat].users[msg.sender].coins = user.coins;
+          db.setChatUser(msg.chat, msg.sender, 'coins', user.coins);
         } else {
           const restante = cantidad - user.coins;
           user.coins = 0;
           user.bank -= restante;
-          global.db.data.chats[msg.chat].users[msg.sender].coins = 0;
-          global.db.data.chats[msg.chat].users[msg.sender].bank = user.bank;
+          db.setChatUser(msg.chat, msg.sender, 'coins', 0);
+          db.setChatUser(msg.chat, msg.sender, 'bank', user.bank);
         }
       } else {
         cantidad = total;
         user.coins = 0;
         user.bank = 0;
-        global.db.data.chats[msg.chat].users[msg.sender].coins = 0;
-        global.db.data.chats[msg.chat].users[msg.sender].bank = 0;
+        db.setChatUser(msg.chat, msg.sender, 'coins', 0);
+        db.setChatUser(msg.chat, msg.sender, 'bank', 0);
       }      
       const failMessages = [
         `El anzuelo de tu Caña se enredó y perdiste parte de tu equipo, perdiste *¥${cantidad.toLocaleString()} ${currency}*.`,
@@ -106,7 +107,7 @@ export default {
       ];
       message = pickRandom(neutralMessages);
     }    
-    global.db.data.chats[msg.chat].users[msg.sender].lastfish = Date.now( + 8 * 60 * 1000);
+    db.setChatUser(msg.chat, msg.sender, 'lastfish', Date.now() + 8 * 60 * 1000);
     await sock.sendMessage(msg.chat, { text: `「✿」 ${message}` }, { quoted: msg });
   }
 };

@@ -1,20 +1,21 @@
+import db from '#db';
 export default {
   command: ['monthly', 'mensual'],
   category: 'economy',
   description: 'Reclamar tu recompensa mensual.',
   run: async ({ msg, sock, usedPrefix, text }) => {
-    const chat = global.db.data.chats[msg.chat];
+    const chat = db.getChat(msg.chat);
     if (chat.adminonly || !chat.economy) {
       return msg.reply(`ꕥ Los comandos de *Economía* están desactivados en este grupo.\n\nUn *administrador* puede activarlos con el comando:\n» *${usedPrefix}economy on*`);
     }
     const botId = sock.user.id.split(':')[0] + '@s.whatsapp.net';
-    const bot = global.db.data.settings[botId];
+    const bot = db.getSettings(botId);
     const currency = bot.currency;
-    (global.db.data.users[msg.sender].monthlyStreak ??= 0);
-    (global.db.data.users[msg.sender].lastMonthlyGlobal ??= 0);
-    (global.db.data.chats[msg.chat]?.users?.[msg.sender] && (global.db.data.chats[msg.chat].users[msg.sender].lastmonthly ??= 0));
-    const users = global.db.data.users[msg.sender];
-    const user = global.db.data.chats[msg.chat]?.users?.[msg.sender];
+    db.setCreate('users', msg.sender, 'monthlyStreak', 0);
+    db.setCreate('users', msg.sender, 'lastMonthlyGlobal', 0);
+    db.setCreate('chat_users', [msg.chat, msg.sender], 'lastmonthly', 0);
+    const users = db.getUser(msg.sender);
+    const user = db.getChatUser(msg.chat, msg.sender);
     const gap = 30 * 24 * 60 * 60 * 1000;
     const now = Date.now();
     if (now < user.lastmonthly) {
@@ -25,17 +26,17 @@ export default {
     const lost = users.monthlyStreak >= 1 && now - users.lastMonthlyGlobal > gap * 1.5;
     if (lost) {
       currentStreak = 0;
-      global.db.data.users[msg.sender].monthlyStreak = 0;
+      db.setUser(msg.sender, 'monthlyStreak', 0);
     }
     const canClaimGlobal = now - users.lastMonthlyGlobal >= gap;
     if (canClaimGlobal) {
       currentStreak = Math.min(currentStreak + 1, 8);
-      global.db.data.users[msg.sender].monthlyStreak = currentStreak;
-      global.db.data.users[msg.sender].lastMonthlyGlobal = now;
+      db.setUser(msg.sender, 'monthlyStreak', currentStreak);
+      db.setUser(msg.sender, 'lastMonthlyGlobal', now);
     }    
     const coins = Math.min(60000 + (currentStreak - 1) * 5000, 95000);
-    global.db.data.chats[msg.chat].users[msg.sender].coins = (user.coins || 0 + coins);
-    global.db.data.chats[msg.chat].users[msg.sender].lastmonthly = now + gap;    
+    db.setChatUser(msg.chat, msg.sender, 'coins', (user.coins || 0) + coins);
+    db.setChatUser(msg.chat, msg.sender, 'lastmonthly', now + gap);    
     let next = Math.min(60000 + currentStreak * 5000, 95000).toLocaleString();
     let caption = `> Mes *${currentStreak + 1}* » *+${next}*`;
     if (lost) caption += `\n> ☆ ¡Has perdido tu racha de meses!`;    
