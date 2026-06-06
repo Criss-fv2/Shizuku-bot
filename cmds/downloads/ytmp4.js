@@ -1,6 +1,6 @@
 import yts from 'yt-search'
 import fetch from 'node-fetch'
-import { extractImageThumb } from '@whiskeysockets/baileys'
+import { extractImageThumb } from 'baileys'
 
 const cmd = {
   command: ['play2', 'mp4', 'ytmp4', 'ytvideo', 'playvideo'],
