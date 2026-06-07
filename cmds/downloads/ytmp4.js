@@ -1,5 +1,6 @@
 import yts from 'yt-search'
 import fetch from 'node-fetch'
+import { extractImageThumb } from 'baileys'
 
 const cmd = {
   command: ['play2', 'mp4', 'ytmp4', 'ytvideo', 'playvideo'],
@@ -74,7 +75,9 @@ const cmd = {
       title = video.title || title
       channel = video.channel || channel
       duration = video.duration || duration
-      thumbnail = thumbnail || video.thumbnail || makeYoutubeThumbnail(video.video_id || getVideoId(url))
+
+      const final_video_id = video.video_id || getVideoId(url)
+      thumbnail = thumbnail || video.thumbnail || makeYoutubeThumbnail(final_video_id)
 
       const file_size = video.size_bytes || parseFileSize(video.size)
       const size_text = file_size ? formatBytes(file_size) : (video.size || 'Desconocido')
@@ -83,13 +86,11 @@ const cmd = {
 
       const caption = `乂 *Video descargado*
 
-> ❖ Canal › *${channel}*
-> ⴵ Duración › *${duration}*
 > ❒ Calidad › *${video.quality || download_quality}*
 > ❒ Tamaño › *${size_text}*`
 
       if (send_as_document) {
-        const thumb_buffer = await makeJpegThumbnail(thumbnail).catch(() => null)
+        const thumb_buffer = await makeJpegThumbnail(thumbnail, final_video_id).catch(() => null)
 
         await sendVideoAsDocument(sock, msg, video.url, file_name, caption, thumb_buffer)
         return
@@ -103,7 +104,7 @@ const cmd = {
           caption
         }, { quoted: msg })
       } catch {
-        const thumb_buffer = await makeJpegThumbnail(thumbnail).catch(() => null)
+        const thumb_buffer = await makeJpegThumbnail(thumbnail, final_video_id).catch(() => null)
 
         await sendVideoAsDocument(sock, msg, video.url, file_name, caption, thumb_buffer)
       }
@@ -476,25 +477,44 @@ async function getVideoFromYtdown(url) {
   }
 }
 
-async function makeJpegThumbnail(thumbnail) {
-  if (!thumbnail) return null
+async function makeJpegThumbnail(thumbnail, video_id) {
+  const urls = [
+    thumbnail,
+    makeYoutubeThumbnail(video_id, 'maxresdefault'),
+    makeYoutubeThumbnail(video_id, 'hqdefault'),
+    makeYoutubeThumbnail(video_id, 'mqdefault')
+  ].filter(Boolean)
 
-  const res = await fetch(thumbnail, {
-    headers: headers.image()
-  })
+  for (const url of urls) {
+    try {
+      const res = await fetch(url, {
+        headers: headers.image()
+      })
 
-  if (!res.ok) {
-    throw new Error(`No se pudo descargar miniatura: HTTP ${res.status}`)
+      if (!res.ok) {
+        continue
+      }
+
+      const image_buffer = Buffer.from(await res.arrayBuffer())
+
+      if (!image_buffer.length) {
+        continue
+      }
+
+      const { buffer } = await extractImageThumb(image_buffer, 300)
+
+      if (buffer?.length) {
+        return buffer
+      }
+    } catch {}
   }
 
-  const buffer = Buffer.from(await res.arrayBuffer())
-
-  return buffer.length ? buffer : null
+  return null
 }
 
-function makeYoutubeThumbnail(video_id) {
+function makeYoutubeThumbnail(video_id, quality = 'hqdefault') {
   if (!video_id) return null
-  return `https://i.ytimg.com/vi/${video_id}/hqdefault.jpg`
+  return `https://i.ytimg.com/vi/${video_id}/${quality}.jpg`
 }
 
 async function sendVideoAsDocument(sock, msg, url, fileName, caption, jpegThumbnail) {
@@ -503,7 +523,11 @@ async function sendVideoAsDocument(sock, msg, url, fileName, caption, jpegThumbn
     mimetype: 'video/mp4',
     fileName,
     caption,
-    ...(jpegThumbnail ? { jpegThumbnail } : {})
+    ...(jpegThumbnail ? {
+      jpegThumbnail,
+      thumbnailWidth: 300,
+      thumbnailHeight: 300
+    } : {})
   }, { quoted: msg })
 }
 
@@ -516,6 +540,11 @@ function parseFileSize(size) {
 
   const raw = String(size).trim()
   if (!raw) return null
+
+  if (/^\d+$/.test(raw)) {
+    const bytes = Number(raw)
+    return Number.isFinite(bytes) && bytes > 0 ? bytes : null
+  }
 
   const match = raw.match(/([\d.,]+)\s*(bytes?|b|kb|kib|mb|mib|gb|gib)?/i)
   if (!match) return null
